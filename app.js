@@ -1226,7 +1226,7 @@ function AIScreen({ teamSlug }) {
       </div>
 
       {/* ── Chat history ── */}
-      <div className="chatarea" style={{ flex: 1 }} ref={chatRef}>
+      <div className="chatarea" style={{ flex: 1, minHeight: 0 }} ref={chatRef}>
         <div className="bub ai" style={{ marginBottom: 14 }}>{welcome}</div>
 
         {messages.map((m, i, all) => (

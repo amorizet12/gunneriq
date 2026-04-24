@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.anthropic.com)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(gunzip -c \"/Users/austinmorizet/.claude/projects/-Users-austinmorizet-Desktop-GunnerIQ-files/ca75673c-bb6c-44b3-8f96-dcd65cf9fdf0/tool-results/webfetch-1776975524538-p20jzq.bin\")"
+    ]
+  }
+}

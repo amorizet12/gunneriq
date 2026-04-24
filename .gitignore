@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment — NEVER commit real API keys
+.env
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Old wireframe files (not part of the deployable app)
+GunnerIQ Wireframes - Standalone.html
+GunnerIQ Wireframes - Standalone(1).html
+
+# Leftover build artefacts
+index-*.js
+index-*.css

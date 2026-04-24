@@ -1105,17 +1105,18 @@ function AIScreen({ teamSlug }) {
     return function() { active = false; };
   }, [teamSlug, retryKey]);
 
-  if (ctxError)  return <ScreenError message={ctxError} onRetry={function() { setRetryKey(function(k) { return k + 1; }); }} />;
-  if (!screenCtx) return <ScreenSkeleton />;
-
-  const { aiCtx, prompts, welcome, ctxLine } = screenCtx;
-
-  // Auto-scroll to bottom whenever messages, loading state, or error change
-  useEffect(() => {
+  // Auto-scroll — must be declared before any early returns (Rules of Hooks).
+  // chatRef.current is null while skeleton shows, so this safely does nothing then.
+  useEffect(function() {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages, loading, apiError]);
+
+  if (ctxError)  return <ScreenError message={ctxError} onRetry={function() { setRetryKey(function(k) { return k + 1; }); }} />;
+  if (!screenCtx) return <ScreenSkeleton />;
+
+  const { aiCtx, prompts, welcome, ctxLine } = screenCtx;
 
   async function send() {
     const text = inputText.trim();
@@ -1140,15 +1141,20 @@ function AIScreen({ teamSlug }) {
       setMessages(prev => [...prev, { r: 'ai', t: reply }]);
 
     } catch (err) {
-      const isNetworkErr = err.message === 'Failed to fetch' || err.message.includes('NetworkError');
-      setApiError(
-        isNetworkErr
-          ? "Can't reach the server — make sure `node server.js` is running."
-          : 'API error: ' + err.message
-      );
+      const msg = err.message || '';
+      const isNetworkErr = msg === 'Failed to fetch' || msg.includes('NetworkError') || msg.includes('fetch');
+      const isKeyMissing = msg.includes('ANTHROPIC_API_KEY') || msg.includes('503');
+      const userFacing = isKeyMissing
+        ? 'AI Chat is not configured — the server is missing its API key. Add ANTHROPIC_API_KEY to your environment variables.'
+        : isNetworkErr
+          ? "Can't reach the server. If running locally, make sure `node server.js` is running."
+          : 'Error: ' + msg;
+      setApiError(userFacing);
       setMessages(prev => [...prev, {
         r: 'ai',
-        t: "Sorry, I couldn't connect right now. Please try again.",
+        t: isKeyMissing
+          ? "The AI assistant isn't configured yet. The server needs an Anthropic API key to respond."
+          : "Sorry, I couldn't connect right now. Please try again.",
       }]);
     } finally {
       setLoading(false);

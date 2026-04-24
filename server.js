@@ -104,6 +104,12 @@ function buildSystemPrompt(teamContext) {
 // Returns: { message: string }
 // ─────────────────────────────────────────────────────────────────
 app.post('/api/v1/chat', async (req, res) => {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(503).json({
+      error: 'ANTHROPIC_API_KEY is not configured on this server. Add it to your environment variables.',
+    });
+  }
+
   const { teamContext, messages } = req.body;
 
   if (!Array.isArray(messages) || messages.length === 0) {

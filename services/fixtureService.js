@@ -106,6 +106,7 @@ var FixtureService = {
       matchInsight:     fixture.matchInsight  || null,
       narrative:        fixture.narrative     || fixture.matchInsight || null,
       keyStats:         fixture.keyStats      || [],
+      isHome:           fixture.isHome !== undefined ? fixture.isHome : isHome,
       formTeam:         form.team             || [],
       formOpponent:     form.opponent         || [],
       talkingPoint:     talkingPoint,

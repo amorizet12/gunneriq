@@ -16,10 +16,9 @@
 var POLLS_DATA = {
 
   // ═══════════════════════════════════════
-  // ARSENAL  (fully populated)
+  // ARSENAL
   // ═══════════════════════════════════════
   arsenal: {
-    // Match Hub — score prediction poll
     scorePrediction: {
       id:          'ars-mci-score-poll',
       totalVotes:  12439,
@@ -29,8 +28,6 @@ var POLLS_DATA = {
         { label: 'City win',    pct: 20 },
       ],
     },
-
-    // Fan Zone — lineup selection poll
     lineupVote: {
       id:          'ars-lineup-vote-gw35',
       question:    'Who Starts vs City?',
@@ -42,44 +39,114 @@ var POLLS_DATA = {
         { label: 'Nketiah (CF)',  pct: 23 },
       ],
     },
-
-    // Fan confidence — % of fans predicting a win (shown on win probability bar)
     fanConfidence: 57,
   },
 
   // ═══════════════════════════════════════
-  // BARCELONA  (placeholder)
+  // BARCELONA
   // ═══════════════════════════════════════
   barcelona: {
-    scorePrediction: { id: '', totalVotes: 0, options: [] },
-    lineupVote:      { id: '', question: '', totalVotes: 0, closesAt: '', options: [] },
-    fanConfidence:   50,
+    scorePrediction: {
+      id:          'fcb-rma-score-poll',
+      totalVotes:  18742,
+      options: [
+        { label: 'Barça win',    pct: 48 },
+        { label: 'Draw',         pct: 24 },
+        { label: 'Madrid win',   pct: 28 },
+      ],
+    },
+    lineupVote: {
+      id:          'fcb-lineup-vote-gw34',
+      question:    'Who partners Casado vs Madrid?',
+      totalVotes:  9831,
+      closesAt:    'midnight',
+      options: [
+        { label: 'Pedri (CM)',    pct: 61 },
+        { label: 'Gündoğan (CM)', pct: 22 },
+        { label: 'Fermín (CM)',   pct: 17 },
+      ],
+    },
+    fanConfidence: 61,
   },
 
   // ═══════════════════════════════════════
-  // REAL MADRID  (placeholder)
+  // REAL MADRID
   // ═══════════════════════════════════════
   'real-madrid': {
-    scorePrediction: { id: '', totalVotes: 0, options: [] },
-    lineupVote:      { id: '', question: '', totalVotes: 0, closesAt: '', options: [] },
-    fanConfidence:   50,
+    scorePrediction: {
+      id:          'rma-fcb-score-poll',
+      totalVotes:  16504,
+      options: [
+        { label: 'Madrid win',  pct: 41 },
+        { label: 'Draw',        pct: 26 },
+        { label: 'Barça win',   pct: 33 },
+      ],
+    },
+    lineupVote: {
+      id:          'rma-lineup-vote-gw34',
+      question:    'Who starts on the right flank?',
+      totalVotes:  7614,
+      closesAt:    'midnight',
+      options: [
+        { label: 'Rodrygo (RW)',   pct: 54 },
+        { label: 'Brahim (RW)',    pct: 28 },
+        { label: 'Valverde (RW)', pct: 18 },
+      ],
+    },
+    fanConfidence: 44,
   },
 
   // ═══════════════════════════════════════
-  // LIVERPOOL  (placeholder)
+  // LIVERPOOL
   // ═══════════════════════════════════════
   liverpool: {
-    scorePrediction: { id: '', totalVotes: 0, options: [] },
-    lineupVote:      { id: '', question: '', totalVotes: 0, closesAt: '', options: [] },
-    fanConfidence:   50,
+    scorePrediction: {
+      id:          'liv-tot-score-poll',
+      totalVotes:  11283,
+      options: [
+        { label: 'Liverpool win', pct: 67 },
+        { label: 'Draw',          pct: 19 },
+        { label: 'Spurs win',     pct: 14 },
+      ],
+    },
+    lineupVote: {
+      id:          'liv-lineup-vote-gw35',
+      question:    "Who leads the line vs Spurs?",
+      totalVotes:  6942,
+      closesAt:    'midnight',
+      options: [
+        { label: 'Núñez (ST)',    pct: 52 },
+        { label: 'Jota (ST)',     pct: 31 },
+        { label: 'Gakpo (ST)',    pct: 17 },
+      ],
+    },
+    fanConfidence: 74,
   },
 
   // ═══════════════════════════════════════
-  // MAN CITY  (placeholder)
+  // MAN CITY
   // ═══════════════════════════════════════
   'man-city': {
-    scorePrediction: { id: '', totalVotes: 0, options: [] },
-    lineupVote:      { id: '', question: '', totalVotes: 0, closesAt: '', options: [] },
-    fanConfidence:   50,
+    scorePrediction: {
+      id:          'mci-ars-score-poll',
+      totalVotes:  10817,
+      options: [
+        { label: 'City win',    pct: 39 },
+        { label: 'Draw',        pct: 27 },
+        { label: 'Arsenal win', pct: 34 },
+      ],
+    },
+    lineupVote: {
+      id:          'mci-lineup-vote-gw35',
+      question:    'Who plays the #10 role vs Arsenal?',
+      totalVotes:  5563,
+      closesAt:    'midnight',
+      options: [
+        { label: 'De Bruyne (CM)',  pct: 58 },
+        { label: 'Bernardo (CM)',   pct: 26 },
+        { label: 'Foden (RW→10)',  pct: 16 },
+      ],
+    },
+    fanConfidence: 39,
   },
 };

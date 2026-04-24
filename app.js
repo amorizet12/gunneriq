@@ -780,6 +780,10 @@ function MatchScreen({ teamSlug }) {
   const { fixture, stats, h2h, injuryList, oppLineup, keyBattles,
           scorePoll, playerMap, lineup, formTeam, formOpponent, recentResults } = data;
 
+  // Derive active-team / opponent labels regardless of home/away status
+  const activeTeamLabel = fixture ? (fixture.isHome ? fixture.homeLabel : fixture.awayLabel) : '';
+  const opponentLabel   = fixture ? (fixture.isHome ? fixture.awayLabel : fixture.homeLabel) : '';
+
   if (!fixture) {
     return (
       <div className="screen-enter" style={{ padding: '40px 24px', textAlign: 'center', color: 'var(--t3)', fontSize: 14, lineHeight: 1.7 }}>
@@ -832,9 +836,9 @@ function MatchScreen({ teamSlug }) {
           {/* Season averages comparison bars */}
           <div className="card" style={{ padding: '20px 18px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--red)' }}>{fixture.homeLabel}</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--red)' }}>{activeTeamLabel}</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Season Avg</span>
-              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--t2)' }}>{fixture.awayLabel}</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--t2)' }}>{opponentLabel}</span>
             </div>
             {stats.map(function({ label, teamValue, oppValue, teamWidth }) {
               return (
@@ -856,9 +860,9 @@ function MatchScreen({ teamSlug }) {
               <div className="lbl" style={{ marginBottom: 12 }}>Head-to-Head</div>
               <div className="card">
                 <div className="h2h">
-                  <div><div className="h2h-n">{h2h.teamWins}</div><div className="h2h-l">{fixture.homeLabel} W</div></div>
+                  <div><div className="h2h-n">{h2h.teamWins}</div><div className="h2h-l">{activeTeamLabel} W</div></div>
                   <div><div className="h2h-n">{h2h.draws}</div><div className="h2h-l">Draws</div></div>
-                  <div><div className="h2h-n">{h2h.oppWins}</div><div className="h2h-l">{fixture.awayLabel} W</div></div>
+                  <div><div className="h2h-n">{h2h.oppWins}</div><div className="h2h-l">{opponentLabel} W</div></div>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--t3)', textAlign: 'center', paddingBottom: h2h.recentMeetings && h2h.recentMeetings.length > 0 ? 4 : 16 }}>
                   {h2h.description}
@@ -931,8 +935,8 @@ function MatchScreen({ teamSlug }) {
           {/* Form dots */}
           <div className="card" style={{ padding: '20px 18px' }}>
             {[
-              { name: fixture.homeLabel, form: formTeam     },
-              { name: fixture.awayLabel, form: formOpponent },
+              { name: activeTeamLabel, form: formTeam     },
+              { name: opponentLabel,   form: formOpponent },
             ].map(function({ name, form: f }) {
               return (
                 <div key={name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
@@ -977,7 +981,7 @@ function MatchScreen({ teamSlug }) {
               {/* Home team (from player service) */}
               <div>
                 <div style={{ fontSize: 12, fontWeight: 800, textAlign: 'center', marginBottom: 4, color: 'var(--red)' }}>
-                  {fixture.homeLabel}
+                  {activeTeamLabel}
                 </div>
                 <div style={{ fontSize: 10, textAlign: 'center', color: 'var(--t3)', marginBottom: 10 }}>
                   {lineup.formation}

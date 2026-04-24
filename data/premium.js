@@ -59,14 +59,14 @@ var PREMIUM_DATA = {
   reviews: [
     {
       id:     'review-001',
-      quote:  '"The match predictions are scarily accurate"',
-      handle: '@gooner_dan',
+      quote:  '"The match predictions are scarily accurate. Nailed the scoreline twice this month."',
+      handle: '@footy_iq_fan',
       rating: 5,
     },
     {
       id:     'review-002',
-      quote:  '"Best Arsenal app I\'ve used. The AI is next level."',
-      handle: '@afc_forever99',
+      quote:  '"Best football AI I\'ve used. The tactical breakdowns actually make sense."',
+      handle: '@tacticalhead99',
       rating: 5,
     },
   ],

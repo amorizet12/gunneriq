@@ -37,18 +37,35 @@ var DataService = {
   loadHomeScreen: async function(teamSlug) {
     await this._delay();
 
+    var fixture = await FixtureService.getFixtureDisplay(teamSlug);
+
+    var isHome  = fixture ? fixture.isHome !== false : true;
+    var oppSlug = fixture
+      ? (isHome ? fixture.awayTeamSlug : fixture.homeTeamSlug)
+      : null;
+
     var results = await Promise.all([
-      FixtureService.getFixtureDisplay(teamSlug),
       NewsService.getLatestNews(teamSlug, 4),
       PlayerService.getPlayerMap(teamSlug),
       PlayerService.getLineup(teamSlug),
+      oppSlug ? PlayerService.getPlayerMap(oppSlug)          : Promise.resolve({}),
+      oppSlug ? PlayerService.getLineup(oppSlug)             : Promise.resolve({ formation: '', rows: [] }),
+      MatchStatsService.getInjuryList(teamSlug),
+      oppSlug ? MatchStatsService.getInjuryList(oppSlug)     : Promise.resolve([]),
+      oppSlug ? NewsService.getLatestNews(oppSlug, 4)        : Promise.resolve([]),
     ]);
 
     return {
-      fixture:   results[0],
-      news:      results[1],
-      playerMap: results[2],
-      lineup:    results[3],
+      fixture:       fixture,
+      news:          results[0],
+      playerMap:     results[1],
+      lineup:        results[2],
+      oppPlayerMap:  results[3],
+      oppLineup:     results[4],
+      oppSlug:       oppSlug,
+      injuryList:    results[5],
+      oppInjuryList: results[6],
+      oppNews:       results[7],
     };
   },
 
@@ -74,11 +91,19 @@ var DataService = {
       FixtureService.getRecentResults(teamSlug),
     ]);
 
+    var fixtureRaw = results[0];
+    var _mhome  = fixtureRaw ? fixtureRaw.isHome !== false : true;
+    var oppSlug = fixtureRaw
+      ? (_mhome ? fixtureRaw.awayTeamSlug : fixtureRaw.homeTeamSlug)
+      : null;
+    var oppInjuryList = oppSlug ? await MatchStatsService.getInjuryList(oppSlug) : [];
+
     return {
       fixture:       results[0],
       stats:         results[1],
       h2h:           results[2],
       injuryList:    results[3],
+      oppInjuryList: oppInjuryList,
       oppLineup:     results[4],
       keyBattles:    results[5],
       scorePoll:     results[6],

@@ -71,9 +71,9 @@ var MATCH_STATS_DATA = {
     ],
 
     opponentLineup: {
-      teamLabel:      'Man City',
-      formation:      '4-3-3',
-      playerInitials: ['ED', 'KW', 'RD', 'MA', 'JG', 'RO', 'KD', 'BS', 'PF', 'EH', 'JD'],
+      teamLabel:   'Man City',
+      formation:   '4-3-3',
+      playerNames: ['Ederson', 'Walker', 'Dias', 'Akanji', 'Gvardiol', 'Rodri', 'De Bruyne', 'Silva', 'Foden', 'Haaland', 'Doku'],
     },
   },
 
@@ -136,9 +136,9 @@ var MATCH_STATS_DATA = {
     ],
 
     opponentLineup: {
-      teamLabel:      'Real Madrid',
-      formation:      '4-3-3',
-      playerInitials: ['TC', 'LV', 'EM', 'AR', 'FM', 'AT', 'FV', 'JB', 'RO', 'KM', 'VJ'],
+      teamLabel:   'Real Madrid',
+      formation:   '4-3-3',
+      playerNames: ['Courtois', 'Vázquez', 'Militão', 'Rüdiger', 'Mendy', 'Tchouaméni', 'Valverde', 'Bellingham', 'Rodrygo', 'Mbappé', 'Vinícius'],
     },
   },
 
@@ -201,9 +201,9 @@ var MATCH_STATS_DATA = {
     ],
 
     opponentLineup: {
-      teamLabel:      'Barcelona',
-      formation:      '4-2-3-1',
-      playerInitials: ['WS', 'JK', 'PC', 'RA', 'AB', 'MC', 'PE', 'LY', 'DO', 'RP', 'RL'],
+      teamLabel:   'Barcelona',
+      formation:   '4-2-3-1',
+      playerNames: ['Szczesny', 'Koundé', 'Cubarsí', 'Araújo', 'Balde', 'Casadó', 'Pedri', 'Yamal', 'Dani Olmo', 'Raphinha', 'Lewandowski'],
     },
   },
 
@@ -266,9 +266,9 @@ var MATCH_STATS_DATA = {
     ],
 
     opponentLineup: {
-      teamLabel:      'Tottenham',
-      formation:      '4-2-3-1',
-      playerInitials: ['FO', 'PP', 'RB', 'BJ', 'DU', 'BS', 'YB', 'MS', 'JM', 'HH', 'SO'],
+      teamLabel:   'Tottenham',
+      formation:   '4-2-3-1',
+      playerNames: ['Vicario', 'Porro', 'Romero', 'Davies', 'Udogie', 'Bissouma', 'Højbjerg', 'Maddison', 'Son', 'Solanke', 'Johnson'],
     },
   },
 
@@ -331,9 +331,9 @@ var MATCH_STATS_DATA = {
     ],
 
     opponentLineup: {
-      teamLabel:      'Arsenal',
-      formation:      '4-3-3',
-      playerInitials: ['DR', 'BW', 'CS', 'OZ', 'KT', 'DR', 'TO', 'KH', 'BS', 'GT', 'LM'],
+      teamLabel:   'Arsenal',
+      formation:   '4-3-3',
+      playerNames: ['Raya', 'White', 'Saliba', 'Magalhães', 'Zinchenko', 'Jorginho', 'Rice', 'Odegaard', 'Saka', 'Havertz', 'Martinelli'],
     },
   },
 };

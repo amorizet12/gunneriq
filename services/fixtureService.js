@@ -107,6 +107,8 @@ var FixtureService = {
       narrative:        fixture.narrative     || fixture.matchInsight || null,
       keyStats:         fixture.keyStats      || [],
       isHome:           fixture.isHome !== undefined ? fixture.isHome : isHome,
+      homeTeamSlug:     fixture.homeTeamSlug  || null,
+      awayTeamSlug:     fixture.awayTeamSlug  || null,
       formTeam:         form.team             || [],
       formOpponent:     form.opponent         || [],
       talkingPoint:     talkingPoint,

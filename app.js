@@ -472,9 +472,104 @@ function TeamPicker({ current, onSelect, onClose }) {
 }
 
 
+// ── Player insight generator ──────────────────────────────────
+function playerInsight(p) {
+  var ln = p.name ? (p.name.split(' ').slice(1).join(' ') || p.name) : 'This player';
+  var s  = p.stats;
+  if (p.position === 'GK')
+    return s.cleanSheets + ' clean sheets across ' + s.appearances + ' appearances. Reliable under pressure and commanding from crosses.';
+  if (p.position === 'CB')
+    return ln + ' has been solid at the back — ' + s.appearances + ' appearances with ' + (s.goals > 0 ? s.goals + ' goal' + (s.goals > 1 ? 's' : '') + ' and ' : '') + 'strong aerial presence all season.';
+  if (p.position === 'RB' || p.position === 'LB')
+    return ln + ' contributes both ways — ' + s.assists + ' assist' + (s.assists !== 1 ? 's' : '') + ' from fullback and consistent defensive output across ' + s.appearances + ' starts.';
+  if (p.position === 'DM')
+    return ln + ' is the defensive anchor — strong in the press and covering ' + s.appearances + ' appearances with ' + s.goals + ' goals and ' + s.assists + ' assists from deep.';
+  if (s.goals >= 15)
+    return ln + "'s " + s.goals + ' goals and ' + s.assists + ' assists make him one of the most productive players in the squad this season.';
+  if (s.assists >= 10)
+    return s.assists + ' assists highlight ' + ln + "'s exceptional creativity. He consistently unlocks defences and creates high-quality chances.";
+  return s.goals + ' goals and ' + s.assists + ' assists across ' + s.appearances + ' appearances. ' + ln + ' brings consistent quality and reliability to the side.';
+}
+
+// ── Player modal — bottom sheet shown when a player is tapped ──
+function PlayerModal({ player, onClose }) {
+  var parts    = player.name ? player.name.split(' ') : [];
+  var insight  = playerInsight(player);
+  var injColor = player.injuryStatus === 'out' ? 'var(--loss)' : player.injuryStatus === 'doubt' ? 'var(--draw)' : 'var(--win)';
+  var injLabel = player.injuryStatus === 'out' ? 'Out' : player.injuryStatus === 'doubt' ? 'Doubt' : 'Available';
+  var stats = player.position === 'GK'
+    ? [
+        { label: 'Clean Sh.', value: player.stats.cleanSheets },
+        { label: 'Appearances', value: player.stats.appearances },
+        { label: 'Fan Vote',  value: player.fanVotePct + '%' },
+      ]
+    : [
+        { label: 'Goals',       value: player.stats.goals       },
+        { label: 'Assists',     value: player.stats.assists      },
+        { label: 'Appearances', value: player.stats.appearances  },
+      ];
+
+  return (
+    <div className="modal-backdrop" onClick={function(e) { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div style={{ padding: '0 20px 24px' }}>
+
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22 }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
+              background: 'var(--s2)', border: '2px solid var(--b2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 900, color: 'var(--red)',
+            }}>
+              {player.position}
+            </div>
+            <div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: 'var(--t1)', letterSpacing: '-0.4px', lineHeight: 1.2 }}>{player.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>#{player.number}</span>
+                <span>·</span>
+                <span>{player.position}</span>
+                <span>·</span>
+                <span style={{ color: injColor }}>{injLabel}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
+            {stats.map(function(s) {
+              return (
+                <div key={s.label} style={{ background: 'var(--s2)', borderRadius: 12, padding: '12px 6px', textAlign: 'center', border: '1px solid var(--b1)' }}>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--t1)', letterSpacing: '-0.5px' }}>{s.value}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 4 }}>{s.label}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* AI insight */}
+          <div style={{ background: 'var(--s2)', borderRadius: 12, padding: '14px 16px', border: '1px solid var(--b1)' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>✦ AI Insight</div>
+            <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.6 }}>{insight}</div>
+          </div>
+
+          {/* Injury note if present */}
+          {player.injuryNote && (
+            <div style={{ marginTop: 12, fontSize: 12, color: injColor, textAlign: 'center' }}>{player.injuryNote}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 // ── Modal dispatcher ──────────────────────────────────────────
 function Modal({ modal, teamSlug, onClose, onOpenModal }) {
   const { type, data } = modal;
+  if (type === 'player')  return <PlayerModal player={data.player} onClose={onClose} />;
   if (type === 'vote')    return <VoteModal teamSlug={teamSlug} onClose={onClose} />;
   if (type === 'quiz')    return <QuizModal onClose={onClose} data={data} />;
   if (type === 'paywall') return <PaywallModal teamSlug={teamSlug} onClose={onClose} />;
@@ -494,14 +589,18 @@ function Modal({ modal, teamSlug, onClose, onOpenModal }) {
 // SCREEN: HOME
 // ═══════════════════════════════════════════════════════════════
 function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
-  const [sel,      setSel]      = useState(null);
   const [data,     setData]     = useState(null);
   const [error,    setError]    = useState(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [showOpp,     setShowOpp]     = useState(false);
+  const [showOppNews, setShowOppNews] = useState(false);
+  const [showOppInj,  setShowOppInj]  = useState(false);
+
+  useEffect(function() { setShowOpp(false); setShowOppNews(false); setShowOppInj(false); }, [teamSlug]);
 
   useEffect(function() {
     var active = true;
-    setData(null); setError(null); setSel(null);
+    setData(null); setError(null);
 
     DataService.loadHomeScreen(teamSlug)
       .then(function(result) { if (active) setData(result); })
@@ -515,8 +614,8 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
 
   const screenData = data;
 
-  const { fixture, news, playerMap, lineup } = screenData;
-  const selPlayer = sel !== null ? playerMap[sel] : null;
+  const { fixture, news, playerMap, lineup, oppPlayerMap, oppLineup,
+          injuryList, oppInjuryList, oppNews } = screenData;
 
   if (!fixture) {
     return (
@@ -649,62 +748,101 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
       )}
 
       {/* ── Predicted Lineup (hidden when no data for this team) ── */}
-      {lineup && lineup.rows && lineup.rows.length > 0 && <div className="sec" style={{ paddingTop: 26 }}>
-        <div className="sec-hd">
-          <span className="lbl">Predicted Lineup · {lineup.formation}</span>
-          <span className="sec-more" onClick={() => onOpenModal('vote')}>Vote →</span>
-        </div>
-        <div className="card">
-          <div className="pitch-wrap">
-            <div className="pitch">
-              <div className="pitch-stripe" />
-              {lineup.rows.map(function(row, ri) {
-                return (
-                  <div key={ri} className="pitch-row">
-                    {row.playerIds.map(function(id) {
-                      const p = playerMap[id];
-                      if (!p) return null;
-                      return (
-                        <div key={id} className="ptok" onClick={() => setSel(sel === id ? null : id)}>
-                          <div className={`pcirc${row.isGoalkeeper ? ' gk' : ''}${sel === id ? ' sel' : ''}`}>
-                            {p.pitchInitials}
-                          </div>
-                          <div className="plabel">{p.pitchInitials}</div>
-                          <div className="pvote">{p.fanVotePct}%</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
+      {lineup && lineup.rows && lineup.rows.length > 0 && (function() {
+        const activeLineup    = showOpp ? oppLineup    : lineup;
+        const activePlayerMap = showOpp ? oppPlayerMap : playerMap;
+        const hasOpp = oppLineup && oppLineup.rows && oppLineup.rows.length > 0;
+        if (!activeLineup || !activeLineup.rows) return null;
+        return (
+          <div className="sec" style={{ paddingTop: 26 }}>
+            <div className="sec-hd">
+              <span className="lbl">Predicted Lineup · {activeLineup.formation}</span>
+              <span className="sec-more" onClick={() => onOpenModal('vote')}>Vote →</span>
             </div>
-            {!selPlayer && <div className="tap-hint">Tap a player to see stats</div>}
-            {selPlayer && (
-              <div className="spanel">
-                <div className="spanel-name">{selPlayer.name}</div>
-                <div className="spanel-grid">
-                  <div>
-                    <div className="sp-num">{selPlayer.stats.goals}</div>
-                    <div className="sp-lbl">Goals</div>
-                  </div>
-                  <div>
-                    <div className="sp-num">{selPlayer.stats.assists}</div>
-                    <div className="sp-lbl">Assists</div>
-                  </div>
-                  <div>
-                    <div className="sp-num">
-                      {selPlayer.stats.cleanSheets > 0 ? selPlayer.stats.cleanSheets : selPlayer.fanVotePct + '%'}
-                    </div>
-                    <div className="sp-lbl">
-                      {selPlayer.stats.cleanSheets > 0 ? 'Clean Sh.' : 'Fan vote'}
-                    </div>
-                  </div>
-                </div>
+            {hasOpp && (
+              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+                <button onClick={() => setShowOpp(false)} style={{
+                  flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: !showOpp ? 'var(--red)' : 'var(--s2)',
+                  color: !showOpp ? '#fff' : 'var(--t2)',
+                  fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+                }}>{primaryLabel}</button>
+                <button onClick={() => setShowOpp(true)} style={{
+                  flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: showOpp ? 'var(--t1)' : 'var(--s2)',
+                  color: showOpp ? 'var(--bg)' : 'var(--t2)',
+                  fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+                }}>{oppLabel}</button>
               </div>
             )}
+            <div className="card">
+              <div className="pitch-wrap">
+                <div className="pitch">
+                  <div className="pitch-stripe" />
+                  {activeLineup.rows.map(function(row, ri) {
+                    return (
+                      <div key={ri} className="pitch-row">
+                        {row.playerIds.map(function(id) {
+                          const p = activePlayerMap[id];
+                          if (!p) return null;
+                          var parts = p.name ? p.name.split(' ') : [];
+                          var lastName = parts.length > 1 ? parts.slice(1).join(' ') : p.name;
+                          return (
+                            <div key={id} className="ptok" onClick={() => onOpenModal('player', { player: p })}>
+                              <div className={`pcirc${row.isGoalkeeper ? ' gk' : ''}`}>
+                                <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '-0.2px' }}>{p.position}</span>
+                              </div>
+                              <div className="plabel">{lastName}</div>
+                              <div className="pvote">{p.fanVotePct}%</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="tap-hint">Tap a player for stats &amp; insight</div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Injury & Availability ── */}
+      {injuryList && injuryList.length > 0 && (
+        <div className="sec">
+          <div className="sec-hd">
+            <span className="lbl">Injury & Availability</span>
+          </div>
+          {oppInjuryList && oppInjuryList.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+              <button onClick={() => setShowOppInj(false)} style={{
+                flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: !showOppInj ? 'var(--red)' : 'var(--s2)',
+                color: !showOppInj ? '#fff' : 'var(--t2)',
+                fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+              }}>{primaryLabel}</button>
+              <button onClick={() => setShowOppInj(true)} style={{
+                flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: showOppInj ? 'var(--t1)' : 'var(--s2)',
+                color: showOppInj ? 'var(--bg)' : 'var(--t2)',
+                fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+              }}>{oppLabel}</button>
+            </div>
+          )}
+          <div className="card">
+            {(showOppInj ? oppInjuryList : injuryList).map(function({ name, status, statusColor }) {
+              return (
+                <div key={name} className="injrow">
+                  <div className="injdot" style={{ background: statusColor }} />
+                  <div className="injname">{name}</div>
+                  <div className="injst" style={{ color: statusColor }}>{status}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>}
+      )}
 
       {/* ── Latest news ── */}
       <div className="sec">
@@ -712,11 +850,27 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
           <span className="lbl">Latest</span>
           <span className="sec-more">All news →</span>
         </div>
+        {oppNews && oppNews.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+            <button onClick={() => setShowOppNews(false)} style={{
+              flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+              background: !showOppNews ? 'var(--red)' : 'var(--s2)',
+              color: !showOppNews ? '#fff' : 'var(--t2)',
+              fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+            }}>{primaryLabel}</button>
+            <button onClick={() => setShowOppNews(true)} style={{
+              flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+              background: showOppNews ? 'var(--t1)' : 'var(--s2)',
+              color: showOppNews ? 'var(--bg)' : 'var(--t2)',
+              fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+            }}>{oppLabel}</button>
+          </div>
+        )}
         <div className="card">
-          {news.length === 0 && (
+          {(showOppNews ? oppNews : news).length === 0 && (
             <div style={{ padding: '16px 18px', color: 'var(--t3)', fontSize: 13 }}>No news available.</div>
           )}
-          {news.map(function(article, i) {
+          {(showOppNews ? oppNews : news).map(function(article, i) {
             return (
               <div key={article.id} className="nrow">
                 <div className="nidx">{String(i + 1).padStart(2, '0')}</div>
@@ -760,11 +914,14 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
 // SCREEN: MATCH HUB
 // ═══════════════════════════════════════════════════════════════
 function MatchScreen({ teamSlug }) {
-  const [atab,     setAtab]    = useState('stats');
-  const [pollVote, setPollVote] = useState(() => PollService.getUserScoreVote(teamSlug));
-  const [data,     setData]    = useState(null);
-  const [error,    setError]   = useState(null);
-  const [retryKey, setRetryKey] = useState(0);
+  const [atab,       setAtab]      = useState('stats');
+  const [pollVote,   setPollVote]  = useState(() => PollService.getUserScoreVote(teamSlug));
+  const [data,       setData]      = useState(null);
+  const [error,      setError]     = useState(null);
+  const [retryKey,   setRetryKey]  = useState(0);
+  const [showOppInj, setShowOppInj] = useState(false);
+
+  useEffect(function() { setShowOppInj(false); }, [teamSlug]);
 
   useEffect(function() {
     var active = true;
@@ -786,7 +943,7 @@ function MatchScreen({ teamSlug }) {
   if (error)  return <ScreenError message={error} onRetry={function() { setRetryKey(function(k) { return k + 1; }); }} />;
   if (!data) return <ScreenSkeleton />;
 
-  const { fixture, stats, h2h, injuryList, oppLineup, keyBattles,
+  const { fixture, stats, h2h, injuryList, oppInjuryList, oppLineup, keyBattles,
           scorePoll, playerMap, lineup, formTeam, formOpponent, recentResults } = data;
 
   // Active team is always primary — shown on left, highlighted
@@ -924,8 +1081,24 @@ function MatchScreen({ teamSlug }) {
           {injuryList.length > 0 && (
             <div style={{ marginTop: 22 }}>
               <div className="lbl" style={{ marginBottom: 12 }}>Injury & News</div>
+              {oppInjuryList && oppInjuryList.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+                  <button onClick={() => setShowOppInj(false)} style={{
+                    flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    background: !showOppInj ? 'var(--red)' : 'var(--s2)',
+                    color: !showOppInj ? '#fff' : 'var(--t2)',
+                    fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+                  }}>{primaryLabel}</button>
+                  <button onClick={() => setShowOppInj(true)} style={{
+                    flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    background: showOppInj ? 'var(--t1)' : 'var(--s2)',
+                    color: showOppInj ? 'var(--bg)' : 'var(--t2)',
+                    fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+                  }}>{opponentLabel}</button>
+                </div>
+              )}
               <div className="card">
-                {injuryList.map(function({ name, status, statusColor }) {
+                {(showOppInj ? (oppInjuryList || []) : injuryList).map(function({ name, status, statusColor }) {
                   return (
                     <div key={name} className="injrow">
                       <div className="injdot" style={{ background: statusColor }} />
@@ -1000,14 +1173,17 @@ function MatchScreen({ teamSlug }) {
                 </div>
                 {lineup.rows.flatMap(function(r) { return r.playerIds; }).map(function(id, i) {
                   const p = playerMap[id];
+                  var parts = p && p.name ? p.name.split(' ') : [];
+                  var lastName = parts.length > 1 ? parts.slice(1).join(' ') : (p ? p.name : '?');
                   return (
                     <div key={id} style={{
                       background: i === 0 ? 'var(--red-a)' : 'var(--s2)',
                       border: '1px solid ' + (i === 0 ? 'var(--red-b)' : 'var(--b1)'),
                       borderRadius: 9, padding: '8px', fontSize: 12, fontWeight: 700,
                       color: i === 0 ? 'var(--red)' : 'var(--t1)', marginBottom: 4, textAlign: 'center',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
-                      {p ? p.pitchInitials : '?'}
+                      {lastName}
                     </div>
                   );
                 })}
@@ -1021,15 +1197,16 @@ function MatchScreen({ teamSlug }) {
                 <div style={{ fontSize: 10, textAlign: 'center', color: 'var(--t3)', marginBottom: 10 }}>
                   {oppLineup.formation}
                 </div>
-                {oppLineup.playerInitials.map(function(init, i) {
+                {(oppLineup.playerNames || oppLineup.playerInitials || []).map(function(name, i) {
                   return (
                     <div key={i} style={{
                       background: i === 0 ? 'rgba(255,255,255,0.06)' : 'var(--s2)',
                       border: '1px solid var(--b1)',
                       borderRadius: 9, padding: '8px', fontSize: 12, fontWeight: 700,
                       color: 'var(--t1)', marginBottom: 4, textAlign: 'center',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
-                      {init}
+                      {name}
                     </div>
                   );
                 })}

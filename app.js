@@ -529,6 +529,15 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
   const { winProb, formTeam, formOpponent } = fixture;
   const hasWinProb = winProb && winProb.home != null;
 
+  // Active team is always primary — shown on left, highlighted
+  const _isHome      = fixture.isHome !== false;
+  const primaryCode  = _isHome ? fixture.homeCode  : fixture.awayCode;
+  const primaryLabel = _isHome ? fixture.homeLabel : fixture.awayLabel;
+  const oppCode      = _isHome ? fixture.awayCode  : fixture.homeCode;
+  const oppLabel     = _isHome ? fixture.awayLabel : fixture.homeLabel;
+  const primaryProb  = winProb && (_isHome ? winProb.home : winProb.away);
+  const oppProb      = winProb && (_isHome ? winProb.away : winProb.home);
+
   // Dynamic date + time-of-day greeting
   const now         = new Date();
   const DAY   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -559,8 +568,8 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
         </div>
         <div className="hero-teams">
           <div className="hteam">
-            <div className="hbadge home">{fixture.homeCode}</div>
-            <div className="hteam-name">{fixture.homeLabel}</div>
+            <div className="hbadge home">{primaryCode}</div>
+            <div className="hteam-name">{primaryLabel}</div>
           </div>
           <div className="hvc">
             <div className="hvc-vs">vs</div>
@@ -568,33 +577,33 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
             <div className="hvc-venue">{fixture.venue}</div>
           </div>
           <div className="hteam">
-            <div className="hbadge away">{fixture.awayCode}</div>
-            <div className="hteam-name">{fixture.awayLabel}</div>
+            <div className="hbadge away">{oppCode}</div>
+            <div className="hteam-name">{oppLabel}</div>
           </div>
         </div>
 
         {/* Recent form */}
         <div className="hero-forms">
-          <FormRow label={fixture.homeLabel} results={formTeam}     />
-          <FormRow label={fixture.awayLabel} results={formOpponent} />
+          <FormRow label={primaryLabel} results={formTeam}     />
+          <FormRow label={oppLabel}     results={formOpponent} />
         </div>
 
         {/* Win probability bar — only shown when data is available */}
         {hasWinProb && (
           <div className="prob-section">
             <div className="prob-label-row">
-              <span style={{ color: 'var(--red)' }}>{fixture.homeLabel} {winProb.home}%</span>
+              <span style={{ color: 'var(--red)' }}>{primaryLabel} {primaryProb}%</span>
               <span style={{ color: 'var(--t3)' }}>Draw {winProb.draw}%</span>
-              <span style={{ color: 'var(--t2)' }}>{fixture.awayLabel} {winProb.away}%</span>
+              <span style={{ color: 'var(--t2)' }}>{oppLabel} {oppProb}%</span>
             </div>
             <div className="prob-track">
-              <div className="prob-fill-home" style={{ width: winProb.home + '%' }} />
+              <div className="prob-fill-home" style={{ width: primaryProb + '%' }} />
               <div className="prob-fill-draw" style={{ width: winProb.draw + '%' }} />
               <div className="prob-fill-away" />
             </div>
             <div className="prob-footer">
               <span>Win probability</span>
-              <span>{winProb.fanPredictPct}% of fans predict {fixture.homeLabel} win</span>
+              <span>{winProb.fanPredictPct}% of fans predict {primaryLabel} win</span>
             </div>
           </div>
         )}
@@ -780,9 +789,12 @@ function MatchScreen({ teamSlug }) {
   const { fixture, stats, h2h, injuryList, oppLineup, keyBattles,
           scorePoll, playerMap, lineup, formTeam, formOpponent, recentResults } = data;
 
-  // Derive active-team / opponent labels regardless of home/away status
-  const activeTeamLabel = fixture ? (fixture.isHome ? fixture.homeLabel : fixture.awayLabel) : '';
-  const opponentLabel   = fixture ? (fixture.isHome ? fixture.awayLabel : fixture.homeLabel) : '';
+  // Active team is always primary — shown on left, highlighted
+  const _mhome        = fixture ? fixture.isHome !== false : true;
+  const primaryLabel  = fixture ? (_mhome ? fixture.homeLabel : fixture.awayLabel) : '';
+  const opponentLabel = fixture ? (_mhome ? fixture.awayLabel : fixture.homeLabel) : '';
+  const primaryCode   = fixture ? (_mhome ? fixture.homeCode  : fixture.awayCode)  : '';
+  const opponentCode  = fixture ? (_mhome ? fixture.awayCode  : fixture.homeCode)  : '';
 
   if (!fixture) {
     return (
@@ -805,8 +817,8 @@ function MatchScreen({ teamSlug }) {
         </div>
         <div className="mteams">
           <div className="mt">
-            <div className="mbadge h">{fixture.homeCode}</div>
-            <div className="mt-name">{fixture.homeLabel}</div>
+            <div className="mbadge h">{primaryCode}</div>
+            <div className="mt-name">{primaryLabel}</div>
           </div>
           <div className="mvc">
             <div className="mvc-vs">vs</div>
@@ -814,8 +826,8 @@ function MatchScreen({ teamSlug }) {
             <div className="mvc-sub">{fixture.date} · {fixture.venue}</div>
           </div>
           <div className="mt">
-            <div className="mbadge a">{fixture.awayCode}</div>
-            <div className="mt-name">{fixture.awayLabel}</div>
+            <div className="mbadge a">{opponentCode}</div>
+            <div className="mt-name">{opponentLabel}</div>
           </div>
         </div>
       </div>
@@ -1480,6 +1492,69 @@ function PremiumScreen({ teamSlug, onOpenModal }) {
 
 
 // ═══════════════════════════════════════════════════════════════
+// ONBOARDING: first-time team picker (full-screen, skipped if team already saved)
+// ═══════════════════════════════════════════════════════════════
+function OnboardingScreen({ onSelect }) {
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, background: 'var(--bg)', zIndex: 200,
+      display: 'flex', flexDirection: 'column', overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
+    }}>
+      {/* Header */}
+      <div style={{ padding: '52px 24px 20px', textAlign: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 18 }}>Welcome</div>
+        <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--t1)', letterSpacing: '-0.8px', lineHeight: 1.2, marginBottom: 12 }}>Pick Your Club</div>
+        <div style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.55 }}>Choose the team you support to personalise your experience</div>
+      </div>
+
+      {/* Team list */}
+      <div style={{ padding: '8px 20px 52px', flex: 1 }}>
+        {TEAM_LIST.map(function(t) {
+          var teamData = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[t.slug]) || {};
+          var c        = teamData.colors || {};
+          var primary  = c.primary || '#EF0107';
+          return (
+            <div
+              key={t.slug}
+              onClick={function() { onSelect(t.slug); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '14px 16px', borderRadius: 16, marginBottom: 10,
+                background: 'var(--s1)', border: '1px solid var(--b1)',
+                cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
+                transition: 'opacity 0.12s',
+              }}
+            >
+              {/* Badge */}
+              <div style={{
+                width: 46, height: 46, borderRadius: 13, flexShrink: 0,
+                background: c.badgeBg || 'var(--s3)',
+                border: '1.5px solid ' + (c.badgeBorder || 'var(--b2)'),
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 900, color: primary, letterSpacing: '-0.3px',
+              }}>
+                {t.code}
+              </div>
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>{t.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 2 }}>
+                  {t.league}{teamData.manager ? ' · ' + teamData.manager : ''}
+                </div>
+              </div>
+              {/* Arrow */}
+              <div style={{ fontSize: 18, color: 'var(--t3)', flexShrink: 0 }}>›</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════
 // APP ROOT
 // ═══════════════════════════════════════════════════════════════
 const SCREENS = { home: HomeScreen, match: MatchScreen, ai: AIScreen, fan: FanScreen, prem: PremiumScreen };
@@ -1488,6 +1563,11 @@ function App() {
   // teamSlug lives in state — persisted to localStorage, defaults to 'arsenal'
   const [teamSlug, setTeamSlug] = useState(function() {
     try { return localStorage.getItem('gunneriq_team') || 'arsenal'; } catch(e) { return 'arsenal'; }
+  });
+
+  // Show onboarding on first launch (no team saved yet)
+  const [showOnboarding, setShowOnboarding] = useState(function() {
+    try { return !localStorage.getItem('gunneriq_team'); } catch(e) { return false; }
   });
 
   const [tab,         setTab]         = useState('home');
@@ -1510,6 +1590,14 @@ function App() {
     if (screenRef.current) screenRef.current.scrollTop = 0;
   }
 
+  function completeOnboarding(slug) {
+    try { localStorage.setItem('gunneriq_team', slug); } catch(e) {}
+    APP_CONFIG.activeTeamSlug = slug;
+    applyTeamColors(slug);
+    setTeamSlug(slug);
+    setShowOnboarding(false);
+  }
+
   function switchTab(id) {
     if (id === tab) return;
     if (screenRef.current) screenRef.current.scrollTop = 0;
@@ -1528,6 +1616,9 @@ function App() {
 
   return (
     <div className="phone">
+      {/* ── First-time onboarding (hides entire app until team is chosen) ── */}
+      {showOnboarding && <OnboardingScreen onSelect={completeOnboarding} />}
+
       {/* ── Status bar ── */}
       <div className="status">
         <span>9:41</span>

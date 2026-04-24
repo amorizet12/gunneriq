@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>GunnerIQ</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -160,7 +160,7 @@ body{
 .status{
   background:var(--bg);color:var(--t3);font-size:13px;font-weight:600;
   padding:14px 28px 8px;display:flex;justify-content:space-between;align-items:center;
-  flex-shrink:0;letter-spacing:-0.2px;
+  flex-shrink:0;letter-spacing:-0.2px;position:relative;z-index:10;
 }
 .status b{color:var(--t1);font-weight:800;font-size:14px;letter-spacing:-0.4px}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -180,6 +180,41 @@ body{
 }
 .ni.on{color:var(--red)}
 .ni-icon{font-size:18px;line-height:1}
+
+/* ── Mobile: fill the real screen instead of the fixed phone mockup ── */
+@media (max-width:430px){
+  html,body{
+    height:100%;
+    min-height:100%;
+    display:block;
+    background:var(--bg);
+  }
+  body{
+    display:block;
+    align-items:initial;
+    justify-content:initial;
+    min-height:100vh;
+    min-height:-webkit-fill-available;
+  }
+  .phone{
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    min-height:-webkit-fill-available;
+    border-radius:0;
+    box-shadow:none;
+  }
+  /* Push status bar below the notch / Dynamic Island */
+  .status{
+    padding-top:calc(14px + env(safe-area-inset-top, 0px));
+    padding-left:20px;
+    padding-right:20px;
+  }
+  /* Push bottom nav above the home-indicator bar */
+  .bnav{
+    padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+}
 
 /* ── Shared primitives ── */
 .card{

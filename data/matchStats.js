@@ -75,6 +75,17 @@ var MATCH_STATS_DATA = {
       formation:   '4-3-3',
       playerNames: ['Ederson', 'Walker', 'Dias', 'Akanji', 'Gvardiol', 'Rodri', 'De Bruyne', 'Silva', 'Foden', 'Haaland', 'Doku'],
     },
+
+    matchEdge: {
+      recommendation: 'Arsenal +1 Asian Handicap',
+      confidence:     72,
+      reasons: [
+        'Arsenal\'s home xG has exceeded 2.1 in 6 consecutive Premier League games — elite offensive output.',
+        'Man City\'s pressing intensity (PPDA) drops 22% in away fixtures; expect Arsenal to dominate transitions.',
+        'Arsenal rank 1st in the division for set-piece goals — Man City rank 17th for conceding from corners.',
+      ],
+      riskFactor: 'Haaland has scored in 4 of his last 5 appearances against Arsenal — one moment of quality can change everything.',
+    },
   },
 
   // ═══════════════════════════════════════
@@ -139,6 +150,17 @@ var MATCH_STATS_DATA = {
       teamLabel:   'Real Madrid',
       formation:   '4-3-3',
       playerNames: ['Courtois', 'Vázquez', 'Militão', 'Rüdiger', 'Mendy', 'Tchouaméni', 'Valverde', 'Bellingham', 'Rodrygo', 'Mbappé', 'Vinícius'],
+    },
+
+    matchEdge: {
+      recommendation: 'Both Teams to Score',
+      confidence:     78,
+      reasons: [
+        '9 of the last 10 El Clásicos have seen goals from both sides — this pattern is one of the most reliable in world football.',
+        'Both goalkeepers faced 15+ shots per game in their last La Liga starts, indicating porous defensive structures.',
+        'High-tempo pressing from both sides creates space behind the defensive line — expect counter-attacking goals.',
+      ],
+      riskFactor: 'Araújo has kept Mbappé scoreless in his last two Clásico starts — if Real struggle to create, BTTS could fail.',
     },
   },
 
@@ -205,6 +227,17 @@ var MATCH_STATS_DATA = {
       formation:   '4-2-3-1',
       playerNames: ['Szczesny', 'Koundé', 'Cubarsí', 'Araújo', 'Balde', 'Casadó', 'Pedri', 'Yamal', 'Dani Olmo', 'Raphinha', 'Lewandowski'],
     },
+
+    matchEdge: {
+      recommendation: 'Real Madrid Win or Draw',
+      confidence:     64,
+      reasons: [
+        'Madrid have lost just once in 12 home games this season — the Bernabéu is a fortress under current form.',
+        'Mbappé\'s 24 La Liga goals give Madrid a match-winner capable of deciding any single moment in the game.',
+        'Barcelona\'s high defensive line concedes 0.4 goals per game directly from through-balls — Madrid\'s pace exploits this.',
+      ],
+      riskFactor: 'Yamal averages a goal contribution every 68 minutes this season — one flash of brilliance ends this edge.',
+    },
   },
 
   // ═══════════════════════════════════════
@@ -270,6 +303,17 @@ var MATCH_STATS_DATA = {
       formation:   '4-2-3-1',
       playerNames: ['Vicario', 'Porro', 'Romero', 'Davies', 'Udogie', 'Bissouma', 'Højbjerg', 'Maddison', 'Son', 'Solanke', 'Johnson'],
     },
+
+    matchEdge: {
+      recommendation: 'Liverpool -1 Asian Handicap',
+      confidence:     81,
+      reasons: [
+        'Liverpool have won 7 consecutive home games at Anfield, conceding just 3 goals across those fixtures.',
+        'Tottenham\'s away record stands at 2 wins in 9 — they struggle to sustain pressure on the road.',
+        'Salah has scored or assisted in 6 of his last 7 appearances against Tottenham — match-defining form.',
+      ],
+      riskFactor: 'Tottenham have scored in 5 of their last 6 away games — a single Son moment could deny the handicap.',
+    },
   },
 
   // ═══════════════════════════════════════
@@ -334,6 +378,17 @@ var MATCH_STATS_DATA = {
       teamLabel:   'Arsenal',
       formation:   '4-3-3',
       playerNames: ['Raya', 'White', 'Saliba', 'Magalhães', 'Zinchenko', 'Jorginho', 'Rice', 'Odegaard', 'Saka', 'Havertz', 'Martinelli'],
+    },
+
+    matchEdge: {
+      recommendation: 'Over 2.5 Goals',
+      confidence:     74,
+      reasons: [
+        'The last 4 meetings between these sides averaged 3.25 goals — this fixture consistently delivers end-to-end action.',
+        'Both teams rank in the top 3 for shots on target per game; sustained pressure from both sides makes goals inevitable.',
+        'City\'s attacking depth means even below-par performances generate enough volume to find the net.',
+      ],
+      riskFactor: 'Arsenal\'s defensive solidity with Saliba in form — if Arsenal sit deep and absorb, this can finish 1-0.',
     },
   },
 };

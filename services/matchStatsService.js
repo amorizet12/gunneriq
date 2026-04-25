@@ -59,4 +59,10 @@ var MatchStatsService = {
     var data  = MATCH_STATS_DATA[teamSlug];
     return data ? (data.opponentLineup || empty) : empty;
   },
+
+  // Returns { recommendation, confidence, reasons, riskFactor } | null
+  getMatchEdge: async function(teamSlug) {
+    var data = MATCH_STATS_DATA[teamSlug];
+    return data ? (data.matchEdge || null) : null;
+  },
 };

@@ -89,6 +89,7 @@ var DataService = {
       PlayerService.getPlayerMap(teamSlug),
       PlayerService.getLineup(teamSlug),
       FixtureService.getRecentResults(teamSlug),
+      MatchStatsService.getMatchEdge(teamSlug),
     ]);
 
     var fixtureRaw = results[0];
@@ -110,6 +111,7 @@ var DataService = {
       playerMap:     results[7],
       lineup:        results[8],
       recentResults: results[9],
+      matchEdge:     results[10],
       formTeam:      form.team     || [],
       formOpponent:  form.opponent || [],
     };

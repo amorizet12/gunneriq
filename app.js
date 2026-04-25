@@ -295,7 +295,7 @@ function QuizModal({ onClose, data }) {
 
 
 // ── Paywall Modal ─────────────────────────────────────────────
-function PaywallModal({ teamSlug, onClose }) {
+function PaywallModal({ teamSlug, onClose, onSuccess }) {
   const [state, setState] = useState('idle'); // 'idle' | 'success'
   // Use PREMIUM_DATA directly — sync, always available, no async issue in a modal
   const plan     = (PREMIUM_DATA.plans || []).find(p => p.isFeatured) || {};
@@ -352,6 +352,7 @@ function PaywallModal({ teamSlug, onClose }) {
           <button className="btn btn-red" style={{ fontSize: 16, padding: 16 }} onClick={() => {
             PremiumService.activateMockPro();
             setState('success');
+            if (onSuccess) onSuccess();
           }}>
             Start Free Trial
           </button>
@@ -567,12 +568,12 @@ function PlayerModal({ player, onClose }) {
 
 
 // ── Modal dispatcher ──────────────────────────────────────────
-function Modal({ modal, teamSlug, onClose, onOpenModal }) {
+function Modal({ modal, teamSlug, onClose, onOpenModal, onProActivated }) {
   const { type, data } = modal;
   if (type === 'player')  return <PlayerModal player={data.player} onClose={onClose} />;
   if (type === 'vote')    return <VoteModal teamSlug={teamSlug} onClose={onClose} />;
   if (type === 'quiz')    return <QuizModal onClose={onClose} data={data} />;
-  if (type === 'paywall') return <PaywallModal teamSlug={teamSlug} onClose={onClose} />;
+  if (type === 'paywall') return <PaywallModal teamSlug={teamSlug} onClose={onClose} onSuccess={onProActivated} />;
   if (type === 'locked')  return (
     <LockedModal
       teamSlug={teamSlug}
@@ -913,7 +914,7 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
 // ═══════════════════════════════════════════════════════════════
 // SCREEN: MATCH HUB
 // ═══════════════════════════════════════════════════════════════
-function MatchScreen({ teamSlug }) {
+function MatchScreen({ teamSlug, isPro, onOpenModal }) {
   const [atab,       setAtab]      = useState('stats');
   const [pollVote,   setPollVote]  = useState(() => PollService.getUserScoreVote(teamSlug));
   const [data,       setData]      = useState(null);
@@ -944,7 +945,8 @@ function MatchScreen({ teamSlug }) {
   if (!data) return <ScreenSkeleton />;
 
   const { fixture, stats, h2h, injuryList, oppInjuryList, oppLineup, keyBattles,
-          scorePoll, playerMap, lineup, formTeam, formOpponent, recentResults } = data;
+          scorePoll, playerMap, lineup, formTeam, formOpponent, recentResults,
+          matchEdge } = data;
 
   // Active team is always primary — shown on left, highlighted
   const _mhome        = fixture ? fixture.isHome !== false : true;
@@ -1242,17 +1244,89 @@ function MatchScreen({ teamSlug }) {
         </div>
       )}
 
-      {/* ── Pro CTA ── */}
-      {(function() {
+      {/* ── Match Edge (Pro feature) ── */}
+      {matchEdge && (function() {
         var _t = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
         var _appName = (_t.aiContext && _t.aiContext.appName) || 'GunnerIQ';
+
+        // Confidence ring colour
+        var ringColor = matchEdge.confidence >= 75 ? 'var(--win)' : matchEdge.confidence >= 60 ? 'var(--draw)' : 'var(--t3)';
+
+        var content = (
+          <div>
+            {/* Recommendation + confidence */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 4 }}>Recommended Play</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--t1)', letterSpacing: '-0.3px' }}>{matchEdge.recommendation}</div>
+              </div>
+              <div style={{ textAlign: 'center', flexShrink: 0, marginLeft: 12 }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', border: '3px solid ' + ringColor, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--s2)' }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: ringColor, lineHeight: 1 }}>{matchEdge.confidence}</div>
+                  <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>conf%</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reasons */}
+            <div style={{ marginBottom: 14 }}>
+              {matchEdge.reasons.map(function(r, i) {
+                return (
+                  <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--red-a)', border: '1px solid var(--red-b)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                      <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--red)' }}>{i + 1}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.5 }}>{r}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Risk factor */}
+            <div style={{ background: 'rgba(255,170,0,0.08)', border: '1px solid rgba(255,170,0,0.2)', borderRadius: 10, padding: '10px 12px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 14, flexShrink: 0 }}>⚠️</span>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--draw)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>Risk Factor</div>
+                <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.5 }}>{matchEdge.riskFactor}</div>
+              </div>
+            </div>
+          </div>
+        );
+
         return (
           <div className="sec">
-            <div className="card" style={{ padding: 18, background: 'var(--s1)', border: '1px solid var(--red-b)' }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>◆ Pro Insights</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--t1)', marginBottom: 6 }}>Advanced predictions & betting angles</div>
-              <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 16, lineHeight: 1.55 }}>xG deep dives, value bets, model-driven match previews</div>
-              <button className="btn btn-outline">Unlock {_appName} Pro</button>
+            <div className="sec-hd">
+              <span className="lbl">◆ Match Edge</span>
+              {!isPro && <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Pro</span>}
+            </div>
+            <div className="card" style={{ padding: 18, position: 'relative', overflow: 'hidden' }}>
+              {/* Always render content — blurred for free users */}
+              <div style={!isPro ? { filter: 'blur(5px)', userSelect: 'none', pointerEvents: 'none' } : {}}>
+                {content}
+              </div>
+
+              {/* Lock overlay for free users */}
+              {!isPro && (
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.18)',
+                  backdropFilter: 'blur(1px)',
+                  WebkitBackdropFilter: 'blur(1px)',
+                  borderRadius: 14,
+                  gap: 12,
+                }}>
+                  <div style={{ fontSize: 28 }}>🔒</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--t1)' }}>Match Edge is Pro</div>
+                  <div style={{ fontSize: 12, color: 'var(--t3)', textAlign: 'center', maxWidth: 180, lineHeight: 1.45 }}>
+                    AI-generated value plays, confidence scores & risk analysis
+                  </div>
+                  <button className="btn btn-red" style={{ padding: '10px 22px', fontSize: 13 }}
+                    onClick={() => onOpenModal('paywall')}>
+                    Unlock {_appName} Pro
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -1750,6 +1824,7 @@ function App() {
   const [tab,         setTab]         = useState('home');
   const [modal,       setModal]       = useState(null);    // null | { type, data }
   const [showPicker,  setShowPicker]  = useState(false);
+  const [isPro,       setIsPro]       = useState(function() { return PremiumService.isPro(); });
   const screenRef = useRef(null);
 
   // Sync CSS vars + APP_CONFIG whenever team changes
@@ -1786,7 +1861,7 @@ function App() {
   function closeModal()                 { setModal(null); }
 
   const Screen      = SCREENS[tab];
-  const screenProps = { teamSlug, onNavigate: switchTab, onOpenModal: openModal };
+  const screenProps = { teamSlug, onNavigate: switchTab, onOpenModal: openModal, isPro };
   const teamData    = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
   const teamCode    = teamData.code      || teamSlug.slice(0,3).toUpperCase();
   const teamShort   = teamData.shortName || teamSlug;
@@ -1868,6 +1943,7 @@ function App() {
           teamSlug={teamSlug}
           onClose={closeModal}
           onOpenModal={openModal}
+          onProActivated={() => setIsPro(true)}
         />
       )}
     </div>

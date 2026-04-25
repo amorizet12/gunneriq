@@ -573,7 +573,8 @@ function Modal({ modal, teamSlug, onClose, onOpenModal, onProActivated }) {
   if (type === 'player')  return <PlayerModal player={data.player} onClose={onClose} />;
   if (type === 'vote')    return <VoteModal teamSlug={teamSlug} onClose={onClose} />;
   if (type === 'quiz')    return <QuizModal onClose={onClose} data={data} />;
-  if (type === 'paywall') return <PaywallModal teamSlug={teamSlug} onClose={onClose} onSuccess={onProActivated} />;
+  if (type === 'paywall')  return <PaywallModal teamSlug={teamSlug} onClose={onClose} onSuccess={onProActivated} />;
+  if (type === 'waitlist') return <WaitlistModal onClose={onClose} />;
   if (type === 'locked')  return (
     <LockedModal
       teamSlug={teamSlug}
@@ -1658,6 +1659,72 @@ function FanScreen({ teamSlug, onOpenModal }) {
 }
 
 
+// ── Waitlist Modal ────────────────────────────────────────────
+function WaitlistModal({ onClose }) {
+  const [email,  setEmail]  = useState('');
+  const [status, setStatus] = useState('idle'); // 'idle' | 'success'
+
+  function submit() {
+    // Simulate submission — swap for real API call later
+    setStatus('success');
+  }
+
+  if (status === 'success') {
+    return (
+      <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="modal-sheet">
+          <div className="modal-handle" />
+          <div className="paywall-success">
+            <div className="paywall-success-icon">✅</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--t1)', letterSpacing: '-0.4px', marginBottom: 10 }}>You're on the list!</div>
+            <div style={{ fontSize: 13, color: 'var(--t3)', lineHeight: 1.6, marginBottom: 24 }}>
+              We'll email you the moment Pro launches. First on the list means first access.
+            </div>
+            <button className="btn btn-red" onClick={onClose}>Done</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div style={{ padding: '20px 20px 32px' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>◆ Pro Waitlist</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--t1)', letterSpacing: '-0.4px', marginBottom: 8 }}>Get early access</div>
+          <div style={{ fontSize: 13, color: 'var(--t3)', lineHeight: 1.55, marginBottom: 24 }}>
+            Be first to unlock Match Edge, Pro AI and every premium feature when we launch.
+          </div>
+          <input
+            type="email"
+            placeholder="your@email.com"
+            value={email}
+            onInput={e => setEmail(e.target.value)}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--s2)', border: '1px solid var(--b1)',
+              borderRadius: 12, padding: '14px 16px',
+              fontSize: 15, color: 'var(--t1)',
+              outline: 'none', marginBottom: 14,
+            }}
+          />
+          <button
+            className="btn btn-red"
+            style={{ fontSize: 15, padding: 14 }}
+            onClick={submit}
+          >
+            Join Waitlist
+          </button>
+          <button className="btn btn-ghost" style={{ marginTop: 10, fontSize: 14 }} onClick={onClose}>Maybe later</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 // ═══════════════════════════════════════════════════════════════
 // SCREEN: PREMIUM
 // ═══════════════════════════════════════════════════════════════
@@ -1736,6 +1803,18 @@ function PremiumScreen({ teamSlug, onOpenModal }) {
             <div className="rstars">{'★'.repeat(r.rating)}</div>
           </div>
         ))}
+      </div>
+
+      {/* Waitlist CTA */}
+      <div className="sec" style={{ paddingBottom: 32 }}>
+        <div className="card" style={{ padding: 18, textAlign: 'center' }}>
+          <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 14, lineHeight: 1.5 }}>
+            Not ready to upgrade? Get notified the moment Pro launches.
+          </div>
+          <button className="btn btn-outline" onClick={() => onOpenModal('waitlist')}>
+            Join Pro Waitlist
+          </button>
+        </div>
       </div>
     </div>
   );

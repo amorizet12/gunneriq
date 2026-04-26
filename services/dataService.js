@@ -53,6 +53,10 @@ var DataService = {
       MatchStatsService.getInjuryList(teamSlug),
       oppSlug ? MatchStatsService.getInjuryList(oppSlug)     : Promise.resolve([]),
       oppSlug ? NewsService.getLatestNews(oppSlug, 4)        : Promise.resolve([]),
+      FixtureService.getRecentResults(teamSlug),
+      DashboardService.getStandings(teamSlug),
+      DashboardService.getSeasonStats(teamSlug),
+      DashboardService.getMatchSelector(teamSlug),
     ]);
 
     return {
@@ -66,6 +70,10 @@ var DataService = {
       injuryList:    results[5],
       oppInjuryList: results[6],
       oppNews:       results[7],
+      recentResults: results[8],
+      standings:     results[9],
+      seasonStats:   results[10],
+      matchSelector: results[11],
     };
   },
 
@@ -97,7 +105,8 @@ var DataService = {
     var oppSlug = fixtureRaw
       ? (_mhome ? fixtureRaw.awayTeamSlug : fixtureRaw.homeTeamSlug)
       : null;
-    var oppInjuryList = oppSlug ? await MatchStatsService.getInjuryList(oppSlug) : [];
+    var oppInjuryList   = oppSlug ? await MatchStatsService.getInjuryList(oppSlug) : [];
+    var matchSelector   = await DashboardService.getMatchSelector(teamSlug);
 
     return {
       fixture:       results[0],
@@ -112,6 +121,7 @@ var DataService = {
       lineup:        results[8],
       recentResults: results[9],
       matchEdge:     results[10],
+      matchSelector: matchSelector,
       formTeam:      form.team     || [],
       formOpponent:  form.opponent || [],
     };

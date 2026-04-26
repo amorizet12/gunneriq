@@ -597,8 +597,11 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
   const [showOpp,     setShowOpp]     = useState(false);
   const [showOppNews, setShowOppNews] = useState(false);
   const [showOppInj,  setShowOppInj]  = useState(false);
+  const [dashTab,     setDashTab]     = useState('standings');
 
-  useEffect(function() { setShowOpp(false); setShowOppNews(false); setShowOppInj(false); }, [teamSlug]);
+  useEffect(function() {
+    setShowOpp(false); setShowOppNews(false); setShowOppInj(false); setDashTab('standings');
+  }, [teamSlug]);
 
   useEffect(function() {
     var active = true;
@@ -617,7 +620,8 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
   const screenData = data;
 
   const { fixture, news, playerMap, lineup, oppPlayerMap, oppLineup,
-          injuryList, oppInjuryList, oppNews } = screenData;
+          injuryList, oppInjuryList, oppNews,
+          recentResults, standings, seasonStats } = screenData;
 
   if (!fixture) {
     return (
@@ -639,24 +643,159 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
   const primaryProb  = winProb && (_isHome ? winProb.home : winProb.away);
   const oppProb      = winProb && (_isHome ? winProb.away : winProb.home);
 
-  // Dynamic date + time-of-day greeting
-  const now         = new Date();
-  const DAY   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const MONTH = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const dateStr = DAY[now.getDay()] + ' ' + now.getDate() + ' ' + MONTH[now.getMonth()];
-  const hour    = now.getHours();
-  const greeting = hour < 12 ? 'Good morning ⚡' : hour < 17 ? 'Good afternoon ⚡' : 'Good evening ⚡';
+
+  const _td      = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
+  const lastResult = recentResults && recentResults[0];
+
+  // Squad grouping helpers
+  const DEF_POS = ['CB','LB','RB','LWB','RWB','WB'];
+  const MID_POS = ['CDM','DM','CM','CAM','AM'];
+  const FWD_POS = ['LW','RW','ST','CF','FW','SS'];
+  const squadGroups = [
+    { label: 'Goalkeepers', filter: function(p) { return p.position === 'GK'; } },
+    { label: 'Defenders',   filter: function(p) { return DEF_POS.includes(p.position); } },
+    { label: 'Midfielders', filter: function(p) { return MID_POS.includes(p.position); } },
+    { label: 'Forwards',    filter: function(p) { return FWD_POS.includes(p.position); } },
+  ];
 
   return (
     <div className="screen-enter">
 
-      {/* ── Greeting ── */}
-      <div className="greeting">
-        <div>
-          <div className="greet-sub">{dateStr}</div>
-          <div className="greet-name">{greeting}</div>
+      {/* ── Team Summary Card ── */}
+      <div className="team-card">
+        <div className="tc-glow" />
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="tc-badge">{_td.code || teamSlug.slice(0,3).toUpperCase()}</div>
+            <div>
+              <div className="tc-name">{_td.shortName || teamSlug}</div>
+              <div className="tc-league">{_td.league || ''}</div>
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            {_td.manager  && <div style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 2 }}>👤 {_td.manager}</div>}
+            {_td.stadium  && <div style={{ fontSize: 11, color: 'var(--t3)' }}>🏟 {_td.stadium}</div>}
+          </div>
         </div>
-        <div className="avatar">👤</div>
+        <div className="tc-divider" />
+        <div style={{ display: 'flex', gap: 8 }}>
+          {lastResult && (
+            <div className="tc-fixture">
+              <div className="tc-fix-label">Last</div>
+              <div className="tc-fix-opp">{lastResult.homeAway === 'H' ? 'vs' : '@'} {lastResult.opponent}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: lastResult.result === 'W' ? 'var(--win)' : lastResult.result === 'L' ? 'var(--loss)' : 'var(--draw)' }}>{lastResult.score}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, borderRadius: 4, padding: '1px 5px', background: lastResult.result === 'W' ? 'rgba(74,222,128,0.15)' : lastResult.result === 'L' ? 'rgba(239,68,68,0.15)' : 'rgba(251,191,36,0.15)', color: lastResult.result === 'W' ? 'var(--win)' : lastResult.result === 'L' ? 'var(--loss)' : 'var(--draw)' }}>{lastResult.result}</span>
+              </div>
+            </div>
+          )}
+          {fixture && (
+            <div className="tc-fixture">
+              <div className="tc-fix-label">Next</div>
+              <div className="tc-fix-opp">{_isHome ? 'vs' : '@'} {oppLabel}</div>
+              <div className="tc-fix-sub">{fixture.time} · {fixture.date}</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Dashboard Tabs ── */}
+      <div className="sec" style={{ paddingTop: 16 }}>
+        <div className="tabs">
+          {[['standings','Table'],['stats','Stats'],['squad','Squad']].map(function([key, label]) {
+            return (
+              <button key={key} className={`tab ${dashTab === key ? 'on' : 'off'}`} onClick={() => setDashTab(key)}>
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Standings */}
+        {dashTab === 'standings' && standings && (
+          <div className="card" style={{ marginTop: 10, overflow: 'hidden', padding: 0 }}>
+            <div className="sth">
+              <span style={{ width: 26, fontSize: 10, fontWeight: 700, color: 'var(--t3)' }}>#</span>
+              <span style={{ flex: 1, fontSize: 10, fontWeight: 700, color: 'var(--t3)' }}>Club</span>
+              {['P','W','D','L','GD','Pts'].map(function(h) {
+                return <span key={h} style={{ width: h === 'GD' ? 34 : h === 'Pts' ? 28 : 24, fontSize: 10, fontWeight: 700, color: 'var(--t3)', textAlign: 'center' }}>{h}</span>;
+              })}
+            </div>
+            {standings.table.map(function(row, i) {
+              return (
+                <div key={row.pos} className={'str' + (row.active ? ' active' : '')}>
+                  <span style={{ width: 26, fontSize: 12, fontWeight: 700, color: row.active ? 'var(--red)' : 'var(--t3)' }}>{row.pos}</span>
+                  <span style={{ flex: 1, fontSize: 12, fontWeight: row.active ? 800 : 500, color: row.active ? 'var(--t1)' : 'var(--t2)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: row.active ? 'var(--red)' : 'var(--t3)', minWidth: 26 }}>{row.code}</span>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{row.team}</span>
+                  </span>
+                  {[row.P, row.W, row.D, row.L].map(function(v, vi) {
+                    return <span key={vi} style={{ width: 24, fontSize: 12, color: 'var(--t3)', textAlign: 'center' }}>{v}</span>;
+                  })}
+                  <span style={{ width: 34, fontSize: 12, color: 'var(--t3)', textAlign: 'center' }}>{row.GD}</span>
+                  <span style={{ width: 28, fontSize: 13, fontWeight: 800, color: row.active ? 'var(--red)' : 'var(--t1)', textAlign: 'center' }}>{row.Pts}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Season Stats */}
+        {dashTab === 'stats' && seasonStats && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[
+                { label: 'Goals Scored',   value: seasonStats.goalsScored   },
+                { label: 'Goals Conceded', value: seasonStats.goalsConceded },
+                { label: 'Assists',        value: seasonStats.assists        },
+                { label: 'Clean Sheets',   value: seasonStats.cleanSheets   },
+                { label: 'Possession',     value: seasonStats.possession    },
+                { label: 'Shots / Game',   value: seasonStats.shotsPerGame  },
+                { label: 'xG For',         value: seasonStats.xGFor         },
+                { label: 'xG Against',     value: seasonStats.xGAgainst     },
+              ].map(function(s) {
+                return (
+                  <div key={s.label} className="card" style={{ padding: '14px 16px' }}>
+                    <div style={{ fontSize: 26, fontWeight: 900, color: 'var(--t1)', letterSpacing: '-0.5px', lineHeight: 1 }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 5, fontWeight: 600 }}>{s.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--t3)', textAlign: 'center', marginTop: 10 }}>{seasonStats.played} matches played this season</div>
+          </div>
+        )}
+
+        {/* Squad */}
+        {dashTab === 'squad' && playerMap && (function() {
+          var squad = Object.values(playerMap).sort(function(a, b) { return a.number - b.number; });
+          return (
+            <div className="card" style={{ marginTop: 10, overflow: 'hidden', padding: 0 }}>
+              {squadGroups.map(function(group, gi) {
+                var players = squad.filter(group.filter);
+                if (!players.length) return null;
+                return (
+                  <div key={group.label}>
+                    <div style={{ padding: '7px 14px 5px', fontSize: 10, fontWeight: 800, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.8px', background: 'var(--s2)', borderTop: gi > 0 ? '1px solid var(--b1)' : 'none' }}>
+                      {group.label}
+                    </div>
+                    {players.map(function(p, pi) {
+                      var injColor = p.injuryStatus === 'out' ? 'var(--loss)' : p.injuryStatus === 'doubt' ? 'var(--draw)' : 'var(--win)';
+                      return (
+                        <div key={p.number} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderTop: '1px solid var(--b1)' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', width: 20, textAlign: 'right' }}>{p.number}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--t1)', flex: 1 }}>{p.name}</span>
+                          <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--t3)', background: 'var(--s2)', borderRadius: 4, padding: '2px 6px', border: '1px solid var(--b1)' }}>{p.position}</span>
+                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: injColor, flexShrink: 0 }} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
 
       {/* ── Hero match card ── */}
@@ -921,9 +1060,10 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
   const [data,       setData]      = useState(null);
   const [error,      setError]     = useState(null);
   const [retryKey,   setRetryKey]  = useState(0);
-  const [showOppInj, setShowOppInj] = useState(false);
+  const [showOppInj,      setShowOppInj]      = useState(false);
+  const [selectedMatchId, setSelectedMatchId] = useState(null);
 
-  useEffect(function() { setShowOppInj(false); }, [teamSlug]);
+  useEffect(function() { setShowOppInj(false); setSelectedMatchId(null); }, [teamSlug]);
 
   useEffect(function() {
     var active = true;
@@ -947,7 +1087,10 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
 
   const { fixture, stats, h2h, injuryList, oppInjuryList, oppLineup, keyBattles,
           scorePoll, playerMap, lineup, formTeam, formOpponent, recentResults,
-          matchEdge } = data;
+          matchEdge, matchSelector } = data;
+
+  const currentSel   = (matchSelector || []).find(function(m) { return m.id === selectedMatchId; }) || null;
+  const selIsCurrent = !currentSel || currentSel.type === 'current';
 
   // Active team is always primary — shown on left, highlighted
   const _mhome        = fixture ? fixture.isHome !== false : true;
@@ -969,28 +1112,84 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
   return (
     <div className="screen-enter">
 
+      {/* ── Match selector strip ── */}
+      {matchSelector && matchSelector.length > 0 && (
+        <div className="msel-strip">
+          {matchSelector.map(function(m) {
+            var isSel = selectedMatchId === m.id || (!selectedMatchId && m.type === 'current');
+            var haScore = m.type === 'past' ? (m.homeAway === 'H' ? m.teamScore + '–' + m.oppScore : m.oppScore + '–' + m.teamScore) : null;
+            return (
+              <div key={m.id} className={'msel ' + (isSel ? 'active' : 'inactive')}
+                onClick={() => setSelectedMatchId(m.type === 'current' ? null : m.id)}>
+                <div className="msel-comp" style={{ color: isSel ? 'rgba(255,255,255,0.65)' : 'var(--t3)' }}>
+                  {m.competition}{m.homeAway === 'H' ? ' H' : ' A'}
+                </div>
+                <div className="msel-opp" style={{ color: isSel ? '#fff' : 'var(--t1)' }}>{m.opCode}</div>
+                {m.type === 'past' ? (
+                  <div className="msel-score" style={{ color: isSel ? '#fff' : 'var(--t2)' }}>{haScore}</div>
+                ) : (
+                  <div className="msel-time" style={{ color: isSel ? 'rgba(255,255,255,0.8)' : 'var(--t3)' }}>
+                    {m.type === 'current' ? m.time : m.date}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* ── Header ── */}
-      <div className="mhero">
-        <div className="mhero-top">
-          <div className="mpage-title">Match Hub</div>
-          <span className="comp-pill">{fixture.competitionShort || fixture.competition}{fixture.gameweek ? ' · GW' + fixture.gameweek : ''}</span>
+      {selIsCurrent ? (
+        <div className="mhero">
+          <div className="mhero-top">
+            <div className="mpage-title">Match Hub</div>
+            <span className="comp-pill">{fixture.competitionShort || fixture.competition}{fixture.gameweek ? ' · GW' + fixture.gameweek : ''}</span>
+          </div>
+          <div className="mteams">
+            <div className="mt">
+              <div className="mbadge h">{primaryCode}</div>
+              <div className="mt-name">{primaryLabel}</div>
+            </div>
+            <div className="mvc">
+              <div className="mvc-vs">vs</div>
+              <div className="mvc-time">{fixture.time}</div>
+              <div className="mvc-sub">{fixture.date} · {fixture.venue}</div>
+            </div>
+            <div className="mt">
+              <div className="mbadge a">{opponentCode}</div>
+              <div className="mt-name">{opponentLabel}</div>
+            </div>
+          </div>
         </div>
-        <div className="mteams">
-          <div className="mt">
-            <div className="mbadge h">{primaryCode}</div>
-            <div className="mt-name">{primaryLabel}</div>
+      ) : (
+        <div className="mhero">
+          <div className="mhero-top">
+            <div className="mpage-title">Match Hub</div>
+            <span className="comp-pill">{currentSel.competition}{currentSel.homeAway === 'H' ? ' · Home' : ' · Away'}</span>
           </div>
-          <div className="mvc">
-            <div className="mvc-vs">vs</div>
-            <div className="mvc-time">{fixture.time}</div>
-            <div className="mvc-sub">{fixture.date} · {fixture.venue}</div>
-          </div>
-          <div className="mt">
-            <div className="mbadge a">{opponentCode}</div>
-            <div className="mt-name">{opponentLabel}</div>
+          <div className="mteams">
+            <div className="mt">
+              <div className="mbadge h">{currentSel.homeAway === 'H' ? primaryCode : currentSel.opCode}</div>
+              <div className="mt-name">{currentSel.homeAway === 'H' ? primaryLabel : currentSel.opponent}</div>
+            </div>
+            <div className="mvc">
+              {currentSel.type === 'past' ? (
+                <div className="mvc-vs" style={{ fontSize: 22, letterSpacing: '-0.5px' }}>
+                  {currentSel.homeAway === 'H' ? currentSel.teamScore + '–' + currentSel.oppScore : currentSel.oppScore + '–' + currentSel.teamScore}
+                </div>
+              ) : (
+                <div className="mvc-vs">vs</div>
+              )}
+              <div className="mvc-time">{currentSel.type === 'past' ? 'FT' : currentSel.time}</div>
+              <div className="mvc-sub">{currentSel.date}</div>
+            </div>
+            <div className="mt">
+              <div className="mbadge a">{currentSel.homeAway === 'H' ? currentSel.opCode : primaryCode}</div>
+              <div className="mt-name">{currentSel.homeAway === 'H' ? currentSel.opponent : primaryLabel}</div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── Tab bar ── */}
       <div className="tabs">
@@ -1004,6 +1203,14 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
       {/* ── STATS TAB ── */}
       {atab === 'stats' && (
         <div className="sec" style={{ paddingTop: 20 }}>
+
+          {/* Notice when non-upcoming match is selected */}
+          {!selIsCurrent && (
+            <div style={{ background: 'var(--s2)', border: '1px solid var(--b1)', borderRadius: 12, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 14 }}>ℹ️</span>
+              <span style={{ fontSize: 12, color: 'var(--t3)', lineHeight: 1.4 }}>Detailed stats shown for the upcoming fixture. Select the current match to see full analysis.</span>
+            </div>
+          )}
 
           {/* Season averages comparison bars */}
           <div className="card" style={{ padding: '20px 18px' }}>

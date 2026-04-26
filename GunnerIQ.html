@@ -89,6 +89,7 @@
 <script src="data/matchStats.js"></script>
 <script src="data/polls.js"></script>
 <script src="data/premium.js"></script>
+<script src="data/dashboard.js"></script>
 
 <!-- ════════════════════════════════════════════════
      SERVICE LAYER
@@ -112,6 +113,7 @@
 <script src="services/pollService.js"></script>
 <script src="services/premiumService.js"></script>
 <script src="services/aiService.js"></script>
+<script src="services/dashboardService.js"></script>
 <script src="services/dataService.js"></script>
 
 <style>
@@ -506,6 +508,34 @@ body{
 .h2h-meeting-score{font-weight:800;min-width:44px;text-align:center}
 .h2h-meeting-comp{color:var(--t3);font-size:10px;width:34px;text-align:right}
 .narrative{font-size:13px;color:var(--t2);line-height:1.6;font-style:italic;padding:10px 14px;border-left:2px solid var(--red-b);margin-top:10px}
+
+/* ═══════════ TEAM DASHBOARD (Home screen) ═══════════ */
+.team-card{margin:14px 16px 0;background:var(--hero-gradient);border:1px solid var(--b2);border-radius:20px;padding:18px 18px 14px;position:relative;overflow:hidden}
+.tc-glow{position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,var(--glow-lo) 0%,transparent 70%);pointer-events:none}
+.tc-badge{width:44px;height:44px;border-radius:12px;background:var(--badge-bg,rgba(239,1,7,0.12));border:1px solid var(--badge-border,rgba(239,1,7,0.22));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--red);letter-spacing:-0.5px;flex-shrink:0}
+.tc-name{font-size:18px;font-weight:900;color:var(--t1);letter-spacing:-0.4px}
+.tc-league{font-size:12px;color:var(--t3);font-weight:600;margin-top:1px}
+.tc-meta{font-size:11px;color:var(--t3);margin-bottom:14px;display:flex;gap:12px;flex-wrap:wrap}
+.tc-divider{height:1px;background:var(--b1);margin-bottom:12px}
+.tc-fixture{flex:1;background:var(--s2);border-radius:10px;padding:8px 10px}
+.tc-fix-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.tc-fix-opp{font-size:12px;font-weight:700;color:var(--t1)}
+.tc-fix-sub{font-size:11px;color:var(--t3);margin-top:3px}
+/* Match selector strip */
+.msel-strip{display:flex;gap:7px;padding:12px 16px 4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.msel-strip::-webkit-scrollbar{display:none}
+.msel{flex-shrink:0;border-radius:11px;padding:8px 12px;cursor:pointer;min-width:72px;max-width:90px;text-align:center;transition:background 0.15s,border-color 0.15s;-webkit-tap-highlight-color:transparent;border:1px solid var(--b1)}
+.msel.active{background:var(--red);border-color:transparent}
+.msel.inactive{background:var(--s2)}
+.msel-comp{font-size:9px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase}
+.msel-opp{font-size:12px;font-weight:800;margin:2px 0}
+.msel-score{font-size:14px;font-weight:900}
+.msel-time{font-size:10px;font-weight:600}
+/* Standings table */
+.sth{display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--b1);background:var(--s2)}
+.str{display:flex;align-items:center;padding:9px 12px;border-bottom:1px solid var(--b1)}
+.str:last-child{border-bottom:none}
+.str.active{background:var(--red-a)}
 </style>
 </head>
 <body>

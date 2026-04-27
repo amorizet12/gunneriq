@@ -594,13 +594,13 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
   const [data,     setData]     = useState(null);
   const [error,    setError]    = useState(null);
   const [retryKey, setRetryKey] = useState(0);
-  const [showOpp,     setShowOpp]     = useState(false);
-  const [showOppNews, setShowOppNews] = useState(false);
-  const [showOppInj,  setShowOppInj]  = useState(false);
-  const [dashTab,     setDashTab]     = useState('standings');
+  const [showOpp,       setShowOpp]       = useState(false);
+  const [showOppInj,    setShowOppInj]    = useState(false);
+  const [dashTab,       setDashTab]       = useState('standings');
+  const [showNarrative, setShowNarrative] = useState(false);
 
   useEffect(function() {
-    setShowOpp(false); setShowOppNews(false); setShowOppInj(false); setDashTab('standings');
+    setShowOpp(false); setShowOppInj(false); setDashTab('standings'); setShowNarrative(false);
   }, [teamSlug]);
 
   useEffect(function() {
@@ -712,33 +712,61 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
         </div>
 
         {/* Standings */}
-        {dashTab === 'standings' && standings && (
-          <div className="card" style={{ marginTop: 10, overflow: 'hidden', padding: 0 }}>
-            <div className="sth">
-              <span style={{ width: 26, fontSize: 10, fontWeight: 700, color: 'var(--t3)' }}>#</span>
-              <span style={{ flex: 1, fontSize: 10, fontWeight: 700, color: 'var(--t3)' }}>Club</span>
-              {['P','W','D','L','GD','Pts'].map(function(h) {
-                return <span key={h} style={{ width: h === 'GD' ? 34 : h === 'Pts' ? 28 : 24, fontSize: 10, fontWeight: 700, color: 'var(--t3)', textAlign: 'center' }}>{h}</span>;
+        {dashTab === 'standings' && standings && (function() {
+          function zoneColor(pos) {
+            if (pos <= 4)  return '#3B82F6';
+            if (pos <= 6)  return '#F97316';
+            if (pos === 7) return '#22C55E';
+            if (pos >= 18) return 'var(--loss)';
+            return null;
+          }
+          var tableRows  = standings.table;
+          var activeIdx  = tableRows.findIndex(function(r) { return r.active; });
+          var winSize    = 8;
+          var winStart   = Math.max(0, Math.min(activeIdx - 2, tableRows.length - winSize));
+          var visible    = tableRows.slice(winStart, winStart + winSize);
+          return (
+            <div className="card" style={{ marginTop: 10, overflow: 'hidden', padding: 0 }}>
+              <div className="sth" style={{ paddingLeft: 6 }}>
+                <span style={{ width: 6, display: 'inline-block' }} />
+                <span style={{ width: 26, fontSize: 10, fontWeight: 700, color: 'var(--t3)' }}>#</span>
+                <span style={{ flex: 1, fontSize: 10, fontWeight: 700, color: 'var(--t3)' }}>Club</span>
+                {['P','W','D','L','GD','Pts'].map(function(h) {
+                  return <span key={h} style={{ width: h === 'GD' ? 34 : h === 'Pts' ? 28 : 24, fontSize: 10, fontWeight: 700, color: 'var(--t3)', textAlign: 'center' }}>{h}</span>;
+                })}
+              </div>
+              {visible.map(function(row) {
+                var zc = zoneColor(row.pos);
+                return (
+                  <div key={row.pos} className={'str' + (row.active ? ' active' : '')} style={{ paddingLeft: 6 }}>
+                    <div style={{ width: 3, alignSelf: 'stretch', background: zc || 'transparent', borderRadius: 2, marginRight: 3, flexShrink: 0 }} />
+                    <span style={{ width: 26, fontSize: 12, fontWeight: 700, color: row.active ? 'var(--red)' : 'var(--t3)' }}>{row.pos}</span>
+                    <span style={{ flex: 1, fontSize: 12, fontWeight: row.active ? 800 : 500, color: row.active ? 'var(--t1)' : 'var(--t2)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ fontSize: 9, fontWeight: 800, color: row.active ? 'var(--red)' : 'var(--t3)', minWidth: 26 }}>{row.code}</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{row.team}</span>
+                    </span>
+                    {[row.P, row.W, row.D, row.L].map(function(v, vi) {
+                      return <span key={vi} style={{ width: 24, fontSize: 12, color: 'var(--t3)', textAlign: 'center' }}>{v}</span>;
+                    })}
+                    <span style={{ width: 34, fontSize: 12, color: 'var(--t3)', textAlign: 'center' }}>{row.GD}</span>
+                    <span style={{ width: 28, fontSize: 13, fontWeight: 800, color: row.active ? 'var(--red)' : 'var(--t1)', textAlign: 'center' }}>{row.Pts}</span>
+                  </div>
+                );
               })}
+              {/* Zone legend */}
+              <div style={{ display: 'flex', gap: 10, padding: '7px 10px 8px', borderTop: '1px solid var(--b1)', flexWrap: 'wrap' }}>
+                {[['#3B82F6','Champions League'],['#F97316','Europa League'],['#22C55E','Conference Lge']].map(function([c,l]) {
+                  return (
+                    <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: 2, background: c, flexShrink: 0 }} />
+                      <span style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 600 }}>{l}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            {standings.table.map(function(row, i) {
-              return (
-                <div key={row.pos} className={'str' + (row.active ? ' active' : '')}>
-                  <span style={{ width: 26, fontSize: 12, fontWeight: 700, color: row.active ? 'var(--red)' : 'var(--t3)' }}>{row.pos}</span>
-                  <span style={{ flex: 1, fontSize: 12, fontWeight: row.active ? 800 : 500, color: row.active ? 'var(--t1)' : 'var(--t2)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: row.active ? 'var(--red)' : 'var(--t3)', minWidth: 26 }}>{row.code}</span>
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{row.team}</span>
-                  </span>
-                  {[row.P, row.W, row.D, row.L].map(function(v, vi) {
-                    return <span key={vi} style={{ width: 24, fontSize: 12, color: 'var(--t3)', textAlign: 'center' }}>{v}</span>;
-                  })}
-                  <span style={{ width: 34, fontSize: 12, color: 'var(--t3)', textAlign: 'center' }}>{row.GD}</span>
-                  <span style={{ width: 28, fontSize: 13, fontWeight: 800, color: row.active ? 'var(--red)' : 'var(--t1)', textAlign: 'center' }}>{row.Pts}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+          );
+        })()}
 
         {/* Season Stats */}
         {dashTab === 'stats' && seasonStats && (
@@ -863,9 +891,19 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
           </div>
         )}
 
-        {/* Tactical narrative — 2-sentence matchup storyline */}
+        {/* Tactical narrative — collapsible */}
         {fixture.narrative && (
-          <div className="narrative">{fixture.narrative}</div>
+          <div>
+            <button onClick={() => setShowNarrative(function(v) { return !v; })} style={{
+              width: '100%', background: 'transparent', border: '1px solid var(--b2)', borderRadius: 8,
+              color: 'var(--t2)', fontSize: 12, fontWeight: 700, padding: '8px 14px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10,
+            }}>
+              <span>{showNarrative ? '▲' : '▼'}</span>
+              <span>{showNarrative ? 'Hide match analysis' : 'View match analysis'}</span>
+            </button>
+            {showNarrative && <div className="narrative" style={{ marginTop: 8 }}>{fixture.narrative}</div>}
+          </div>
         )}
 
         {/* Navigate to Match Hub */}
@@ -934,7 +972,6 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
                                 <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '-0.2px' }}>{p.position}</span>
                               </div>
                               <div className="plabel">{lastName}</div>
-                              <div className="pvote">{p.fanVotePct}%</div>
                             </div>
                           );
                         })}
@@ -991,27 +1028,11 @@ function HomeScreen({ teamSlug, onNavigate, onOpenModal }) {
           <span className="lbl">Latest</span>
           <span className="sec-more">All news →</span>
         </div>
-        {oppNews && oppNews.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-            <button onClick={() => setShowOppNews(false)} style={{
-              flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-              background: !showOppNews ? 'var(--red)' : 'var(--s2)',
-              color: !showOppNews ? '#fff' : 'var(--t2)',
-              fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
-            }}>{primaryLabel}</button>
-            <button onClick={() => setShowOppNews(true)} style={{
-              flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-              background: showOppNews ? 'var(--t1)' : 'var(--s2)',
-              color: showOppNews ? 'var(--bg)' : 'var(--t2)',
-              fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
-            }}>{oppLabel}</button>
-          </div>
-        )}
         <div className="card">
-          {(showOppNews ? oppNews : news).length === 0 && (
+          {(!news || news.length === 0) && (
             <div style={{ padding: '16px 18px', color: 'var(--t3)', fontSize: 13 }}>No news available.</div>
           )}
-          {(showOppNews ? oppNews : news).map(function(article, i) {
+          {(news || []).map(function(article, i) {
             return (
               <div key={article.id} className="nrow">
                 <div className="nidx">{String(i + 1).padStart(2, '0')}</div>
@@ -1060,10 +1081,21 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
   const [data,       setData]      = useState(null);
   const [error,      setError]     = useState(null);
   const [retryKey,   setRetryKey]  = useState(0);
-  const [showOppInj,      setShowOppInj]      = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState(null);
+  const [lineupView,      setLineupView]      = useState('list');
+  const [showMatchNews,   setShowMatchNews]   = useState('team');
+  const mselStripRef = useRef(null);
 
-  useEffect(function() { setShowOppInj(false); setSelectedMatchId(null); }, [teamSlug]);
+  useEffect(function() { setSelectedMatchId(null); setLineupView('list'); setShowMatchNews('team'); }, [teamSlug]);
+
+  useEffect(function() {
+    if (!mselStripRef.current || !data) return;
+    var strip = mselStripRef.current;
+    var active = strip.querySelector('.msel.active');
+    if (active) {
+      strip.scrollLeft = active.offsetLeft - (strip.offsetWidth / 2) + (active.offsetWidth / 2);
+    }
+  }, [data]);
 
   useEffect(function() {
     var active = true;
@@ -1087,7 +1119,7 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
 
   const { fixture, stats, h2h, injuryList, oppInjuryList, oppLineup, keyBattles,
           scorePoll, playerMap, lineup, formTeam, formOpponent, recentResults,
-          matchEdge, matchSelector } = data;
+          matchEdge, matchSelector, news, oppNews } = data;
 
   const currentSel   = (matchSelector || []).find(function(m) { return m.id === selectedMatchId; }) || null;
   const selIsCurrent = !currentSel || currentSel.type === 'current';
@@ -1114,10 +1146,20 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
 
       {/* ── Match selector strip ── */}
       {matchSelector && matchSelector.length > 0 && (
-        <div className="msel-strip">
+        <div className="msel-strip" ref={mselStripRef}>
           {matchSelector.map(function(m) {
             var isSel = selectedMatchId === m.id || (!selectedMatchId && m.type === 'current');
-            var haScore = m.type === 'past' ? (m.homeAway === 'H' ? m.teamScore + '–' + m.oppScore : m.oppScore + '–' + m.teamScore) : null;
+            var result = m.type === 'past'
+              ? (m.teamScore > m.oppScore ? 'W' : m.teamScore < m.oppScore ? 'L' : 'D')
+              : null;
+            var haScore = result
+              ? (m.homeAway === 'H' ? m.teamScore + '–' + m.oppScore : m.oppScore + '–' + m.teamScore)
+              : null;
+            var scoreColor = isSel ? '#fff'
+              : result === 'W' ? 'var(--win)'
+              : result === 'L' ? 'var(--loss)'
+              : result === 'D' ? 'var(--draw)'
+              : 'var(--t2)';
             return (
               <div key={m.id} className={'msel ' + (isSel ? 'active' : 'inactive')}
                 onClick={() => setSelectedMatchId(m.type === 'current' ? null : m.id)}>
@@ -1126,7 +1168,7 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
                 </div>
                 <div className="msel-opp" style={{ color: isSel ? '#fff' : 'var(--t1)' }}>{m.opCode}</div>
                 {m.type === 'past' ? (
-                  <div className="msel-score" style={{ color: isSel ? '#fff' : 'var(--t2)' }}>{haScore}</div>
+                  <div className="msel-score" style={{ color: scoreColor, fontWeight: 900 }}>{haScore}</div>
                 ) : (
                   <div className="msel-time" style={{ color: isSel ? 'rgba(255,255,255,0.8)' : 'var(--t3)' }}>
                     {m.type === 'current' ? m.time : m.date}
@@ -1287,36 +1329,43 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
             </div>
           )}
 
-          {/* Injury & availability */}
-          {injuryList.length > 0 && (
+          {/* Injury & availability — both teams shown together */}
+          {(injuryList.length > 0 || (oppInjuryList && oppInjuryList.length > 0)) && (
             <div style={{ marginTop: 22 }}>
-              <div className="lbl" style={{ marginBottom: 12 }}>Injury & News</div>
-              {oppInjuryList && oppInjuryList.length > 0 && (
-                <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-                  <button onClick={() => setShowOppInj(false)} style={{
-                    flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-                    background: !showOppInj ? 'var(--red)' : 'var(--s2)',
-                    color: !showOppInj ? '#fff' : 'var(--t2)',
-                    fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
-                  }}>{primaryLabel}</button>
-                  <button onClick={() => setShowOppInj(true)} style={{
-                    flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-                    background: showOppInj ? 'var(--t1)' : 'var(--s2)',
-                    color: showOppInj ? 'var(--bg)' : 'var(--t2)',
-                    fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
-                  }}>{opponentLabel}</button>
-                </div>
-              )}
+              <div className="lbl" style={{ marginBottom: 12 }}>Injury & Availability</div>
               <div className="card">
-                {(showOppInj ? (oppInjuryList || []) : injuryList).map(function({ name, status, statusColor }) {
-                  return (
-                    <div key={name} className="injrow">
-                      <div className="injdot" style={{ background: statusColor }} />
-                      <div className="injname">{name}</div>
-                      <div className="injst" style={{ color: statusColor }}>{status}</div>
+                {injuryList.length > 0 && (
+                  <div>
+                    <div style={{ padding: '7px 14px 5px', fontSize: 10, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.8px', background: 'var(--s2)', borderBottom: '1px solid var(--b1)' }}>
+                      {primaryLabel}
                     </div>
-                  );
-                })}
+                    {injuryList.map(function({ name, status, statusColor }) {
+                      return (
+                        <div key={name} className="injrow">
+                          <div className="injdot" style={{ background: statusColor }} />
+                          <div className="injname">{name}</div>
+                          <div className="injst" style={{ color: statusColor }}>{status}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {oppInjuryList && oppInjuryList.length > 0 && (
+                  <div style={{ borderTop: injuryList.length > 0 ? '1px solid var(--b1)' : 'none' }}>
+                    <div style={{ padding: '7px 14px 5px', fontSize: 10, fontWeight: 800, color: 'var(--t2)', textTransform: 'uppercase', letterSpacing: '0.8px', background: 'var(--s2)', borderBottom: '1px solid var(--b1)' }}>
+                      {opponentLabel}
+                    </div>
+                    {oppInjuryList.map(function({ name, status, statusColor }) {
+                      return (
+                        <div key={name} className="injrow">
+                          <div className="injdot" style={{ background: statusColor }} />
+                          <div className="injname">{name}</div>
+                          <div className="injst" style={{ color: statusColor }}>{status}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1368,63 +1417,144 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
       )}
 
       {/* ── LINEUPS TAB ── */}
-      {atab === 'lineups' && (
-        <div className="sec" style={{ paddingTop: 20 }}>
-          <div className="card" style={{ padding: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      {atab === 'lineups' && (function() {
+        var oppNames = oppLineup ? (oppLineup.playerNames || oppLineup.playerInitials || []) : [];
 
-              {/* Home team (from player service) */}
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 800, textAlign: 'center', marginBottom: 4, color: 'var(--red)' }}>
-                  {primaryLabel}
-                </div>
-                <div style={{ fontSize: 10, textAlign: 'center', color: 'var(--t3)', marginBottom: 10 }}>
-                  {lineup.formation}
-                </div>
-                {lineup.rows.flatMap(function(r) { return r.playerIds; }).map(function(id, i) {
-                  const p = playerMap[id];
-                  var parts = p && p.name ? p.name.split(' ') : [];
-                  var lastName = parts.length > 1 ? parts.slice(1).join(' ') : (p ? p.name : '?');
-                  return (
-                    <div key={id} style={{
-                      background: i === 0 ? 'var(--red-a)' : 'var(--s2)',
-                      border: '1px solid ' + (i === 0 ? 'var(--red-b)' : 'var(--b1)'),
-                      borderRadius: 9, padding: '8px', fontSize: 12, fontWeight: 700,
-                      color: i === 0 ? 'var(--red)' : 'var(--t1)', marginBottom: 4, textAlign: 'center',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {lastName}
-                    </div>
-                  );
-                })}
-              </div>
+        // Parse opponent formation into rows: [GK], [DEF...], [MID...], [FWD...]
+        function parseOppRows(formation, names) {
+          var parts = formation ? formation.split('-').map(Number) : [];
+          var rows = [[names[0]]];
+          var idx = 1;
+          for (var i = 0; i < parts.length; i++) {
+            rows.push(names.slice(idx, idx + parts[i]));
+            idx += parts[i];
+          }
+          return rows;
+        }
+        var oppRows = oppLineup ? parseOppRows(oppLineup.formation, oppNames) : [];
 
-              {/* Away team (from matchStats service) */}
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 800, textAlign: 'center', marginBottom: 4, color: 'var(--t2)' }}>
-                  {oppLineup.teamLabel}
-                </div>
-                <div style={{ fontSize: 10, textAlign: 'center', color: 'var(--t3)', marginBottom: 10 }}>
-                  {oppLineup.formation}
-                </div>
-                {(oppLineup.playerNames || oppLineup.playerInitials || []).map(function(name, i) {
-                  return (
-                    <div key={i} style={{
-                      background: i === 0 ? 'rgba(255,255,255,0.06)' : 'var(--s2)',
-                      border: '1px solid var(--b1)',
-                      borderRadius: 9, padding: '8px', fontSize: 12, fontWeight: 700,
-                      color: 'var(--t1)', marginBottom: 4, textAlign: 'center',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {name}
-                    </div>
-                  );
-                })}
-              </div>
+        return (
+          <div className="sec" style={{ paddingTop: 20 }}>
+            {/* View toggle */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+              {[['list','List'],['pitch','Pitch']].map(function([v, lbl]) {
+                return (
+                  <button key={v} onClick={() => setLineupView(v)} style={{
+                    flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    background: lineupView === v ? 'var(--red)' : 'var(--s2)',
+                    color: lineupView === v ? '#fff' : 'var(--t2)',
+                    fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+                  }}>{lbl}</button>
+                );
+              })}
             </div>
+
+            {/* LIST VIEW */}
+            {lineupView === 'list' && (
+              <div className="card" style={{ padding: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 800, textAlign: 'center', marginBottom: 4, color: 'var(--red)' }}>{primaryLabel}</div>
+                    <div style={{ fontSize: 10, textAlign: 'center', color: 'var(--t3)', marginBottom: 10 }}>{lineup.formation}</div>
+                    {lineup.rows.flatMap(function(r) { return r.playerIds; }).map(function(id, i) {
+                      const p = playerMap[id];
+                      var parts = p && p.name ? p.name.split(' ') : [];
+                      var lastName = parts.length > 1 ? parts.slice(1).join(' ') : (p ? p.name : '?');
+                      return (
+                        <div key={id} style={{
+                          background: i === 0 ? 'var(--red-a)' : 'var(--s2)',
+                          border: '1px solid ' + (i === 0 ? 'var(--red-b)' : 'var(--b1)'),
+                          borderRadius: 9, padding: '8px', fontSize: 12, fontWeight: 700,
+                          color: i === 0 ? 'var(--red)' : 'var(--t1)', marginBottom: 4, textAlign: 'center',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>{lastName}</div>
+                      );
+                    })}
+                  </div>
+                  {oppLineup && (
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 800, textAlign: 'center', marginBottom: 4, color: 'var(--t2)' }}>{oppLineup.teamLabel}</div>
+                      <div style={{ fontSize: 10, textAlign: 'center', color: 'var(--t3)', marginBottom: 10 }}>{oppLineup.formation}</div>
+                      {oppNames.map(function(name, i) {
+                        return (
+                          <div key={i} style={{
+                            background: i === 0 ? 'rgba(255,255,255,0.06)' : 'var(--s2)',
+                            border: '1px solid var(--b1)',
+                            borderRadius: 9, padding: '8px', fontSize: 12, fontWeight: 700,
+                            color: 'var(--t1)', marginBottom: 4, textAlign: 'center',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>{name}</div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* PITCH VIEW */}
+            {lineupView === 'pitch' && (
+              <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div className="pitch-wrap" style={{ minHeight: 520, paddingBottom: 16 }}>
+                  <div className="pitch" style={{ gap: 0, paddingTop: 10, paddingBottom: 10 }}>
+                    <div className="pitch-stripe" />
+
+                    {/* Opponent — GK at top, attack near center */}
+                    <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--t3)', textAlign: 'center', marginBottom: 6, letterSpacing: '0.4px' }}>
+                      {oppLineup ? oppLineup.teamLabel : opponentLabel} · {oppLineup ? oppLineup.formation : ''}
+                    </div>
+                    {oppRows.map(function(row, ri) {
+                      return (
+                        <div key={'opp-' + ri} className="pitch-row" style={{ marginBottom: ri === oppRows.length - 1 ? 10 : 3 }}>
+                          {row.map(function(name, pi) {
+                            return (
+                              <div key={pi} className="ptok">
+                                <div className="pcirc" style={{ background: 'rgba(255,255,255,0.08)', border: '1.5px solid rgba(255,255,255,0.2)' }}>
+                                  <span style={{ fontSize: 8, fontWeight: 800, color: 'var(--t2)' }}>{name ? name.slice(0,2).toUpperCase() : ''}</span>
+                                </div>
+                                <div className="plabel" style={{ color: 'var(--t2)', fontSize: 9 }}>{name}</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+
+                    {/* Center line */}
+                    <div style={{ width: '85%', height: 1, background: 'rgba(255,255,255,0.18)', margin: '4px auto 4px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: 28, height: 28, border: '1px solid rgba(255,255,255,0.18)', borderRadius: '50%', position: 'absolute', background: 'transparent' }} />
+                    </div>
+
+                    {/* Home team — attack near center, GK at bottom */}
+                    <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--red)', textAlign: 'center', marginTop: 10, marginBottom: 6, letterSpacing: '0.4px' }}>
+                      {primaryLabel} · {lineup.formation}
+                    </div>
+                    {[...lineup.rows].reverse().map(function(row, ri) {
+                      return (
+                        <div key={'home-' + ri} className="pitch-row" style={{ marginBottom: ri === lineup.rows.length - 1 ? 0 : 3 }}>
+                          {row.playerIds.map(function(id) {
+                            const p = playerMap[id];
+                            var parts = p && p.name ? p.name.split(' ') : [];
+                            var lastName = parts.length > 1 ? parts.slice(1).join(' ') : (p ? p.name : '?');
+                            return (
+                              <div key={id} className="ptok">
+                                <div className={`pcirc${row.isGoalkeeper ? ' gk' : ''}`}>
+                                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '-0.2px' }}>{p ? p.position : ''}</span>
+                                </div>
+                                <div className="plabel">{lastName}</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── POLL TAB ── */}
       {atab === 'poll' && (
@@ -1448,6 +1578,45 @@ function MatchScreen({ teamSlug, isPro, onOpenModal }) {
             <div style={{ fontSize: 12, color: 'var(--t3)', textAlign: 'center', padding: '14px 0 6px' }}>
               {scorePoll.totalVotes.toLocaleString()} votes
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Latest News ── */}
+      {news && news.length > 0 && (
+        <div className="sec">
+          <div className="sec-hd">
+            <span className="lbl">Latest News</span>
+          </div>
+          {oppNews && oppNews.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+              <button onClick={() => setShowMatchNews('team')} style={{
+                flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: showMatchNews === 'team' ? 'var(--red)' : 'var(--s2)',
+                color: showMatchNews === 'team' ? '#fff' : 'var(--t2)',
+                fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+              }}>{primaryLabel}</button>
+              <button onClick={() => setShowMatchNews('opp')} style={{
+                flex: 1, padding: '7px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: showMatchNews === 'opp' ? 'var(--t1)' : 'var(--s2)',
+                color: showMatchNews === 'opp' ? 'var(--bg)' : 'var(--t2)',
+                fontSize: 12, fontWeight: 700, transition: 'background 0.15s',
+              }}>{opponentLabel}</button>
+            </div>
+          )}
+          <div className="card">
+            {(showMatchNews === 'opp' ? (oppNews || []) : news).map(function(article, i) {
+              return (
+                <div key={article.id} className="nrow">
+                  <div className="nidx">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <span className="ntag">{article.tag}</span>
+                    <div className="nhead">{article.title}</div>
+                    <div className="nmeta">{article.publishedAt} · {article.source}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -105,8 +105,12 @@ var DataService = {
     var oppSlug = fixtureRaw
       ? (_mhome ? fixtureRaw.awayTeamSlug : fixtureRaw.homeTeamSlug)
       : null;
-    var oppInjuryList   = oppSlug ? await MatchStatsService.getInjuryList(oppSlug) : [];
-    var matchSelector   = await DashboardService.getMatchSelector(teamSlug);
+    var oppInjuryList = oppSlug ? await MatchStatsService.getInjuryList(oppSlug) : [];
+    var matchSelector = await DashboardService.getMatchSelector(teamSlug);
+    var newsResults   = await Promise.all([
+      NewsService.getLatestNews(teamSlug, 4),
+      oppSlug ? NewsService.getLatestNews(oppSlug, 4) : Promise.resolve([]),
+    ]);
 
     return {
       fixture:       results[0],
@@ -124,6 +128,8 @@ var DataService = {
       matchSelector: matchSelector,
       formTeam:      form.team     || [],
       formOpponent:  form.opponent || [],
+      news:          newsResults[0],
+      oppNews:       newsResults[1],
     };
   },
 

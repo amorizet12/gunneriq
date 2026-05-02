@@ -661,10 +661,16 @@ function QuizLauncherModal({ teamSlug, onClose }) {
 
 // ── Player Compare Modal ──────────────────────────────────────
 function PlayerCompareModal({ teamSlug, onClose }) {
-  const squad    = (PlayerService.getSquad(teamSlug) || []).filter(p => p.position !== 'GK' && p.injuryStatus !== 'out');
+  const [squad, setSquad] = useState([]);
   const [p1Id, setP1Id] = useState(null);
   const [p2Id, setP2Id] = useState(null);
   const step = p1Id === null ? 'pick1' : p2Id === null ? 'pick2' : 'compare';
+
+  useEffect(function() {
+    PlayerService.getSquad(teamSlug).then(function(raw) {
+      setSquad((raw || []).filter(function(p) { return p.position !== 'GK' && p.injuryStatus !== 'out'; }));
+    }).catch(function() { setSquad([]); });
+  }, [teamSlug]);
 
   const teamData  = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
   const teamShort = teamData.shortName || teamSlug;
@@ -2727,7 +2733,7 @@ function FanScreen({ teamSlug, onOpenModal }) {
       </div>
 
       {/* Fan poll from data layer */}
-      {lineupPoll.options.length > 0 && (
+      {lineupPoll && lineupPoll.options && lineupPoll.options.length > 0 && (
         <div className="sec">
           <div className="lbl" style={{ marginBottom: 12 }}>
             Fan Poll · {lineupPoll.question}

@@ -186,7 +186,7 @@ var TACTICAL_MOCK = {
     formation: '4-2-3-1',
     style: 'Positional play · Vertical pressing · La Masia DNA',
     preview: [
-      { label: 'Pressing Trigger', value: 'Opponent's 2nd touch' },
+      { label: 'Pressing Trigger', value: "Opponent's 2nd touch" },
       { label: 'Defensive Shape',  value: 'High press 4-2-3-1' },
       { label: 'Build-up Route',   value: 'Through centre via Pedri' },
       { label: 'Width Source',     value: 'Full-backs + Yamal/Raphinha' },

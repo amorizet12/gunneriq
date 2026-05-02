@@ -35,6 +35,241 @@ function applyTeamColors(teamSlug) {
   root.setProperty('--pwrap-end',      hexToRgba(primary, 0.4));
 }
 
+// ── Fan Zone mock data ─────────────────────────────────────────
+var TRANSFER_MOCK = {
+  arsenal: {
+    rumours: [
+      { name: 'Florian Wirtz',     club: 'B. Leverkusen',  pos: 'CAM', likelihood: '65%', note: "Arsenal's #1 summer target — would cost £120m+" },
+      { name: 'Viktor Gyökeres',   club: 'Sporting CP',    pos: 'ST',  likelihood: '50%', note: 'Viewed as the long-term striker solution' },
+      { name: 'Martin Zubimendi',  club: 'Real Sociedad',  pos: 'DM',  likelihood: '35%', note: 'Arteta wants midfield depth alongside Rice' },
+    ],
+    inProcess: [
+      { name: 'Riccardo Calafiori', club: 'Bologna',   pos: 'CB', status: 'Fee agreed',   note: 'Personal terms being finalised, £38m deal' },
+      { name: 'Andrea Cambiaso',    club: 'Juventus',  pos: 'LB', status: 'Talks advanced', note: 'Versatile full-back targeted for depth' },
+    ],
+    doneDeal: [
+      { name: 'Mikel Merino',     club: 'Real Sociedad',     pos: 'CM', status: 'Signed',   note: '£32m, adds quality rotation in midfield' },
+      { name: 'Thomas Partey',    club: 'Contract expired',  pos: 'DM', status: 'Released', note: 'Contract not renewed after 4 seasons' },
+    ],
+  },
+  barcelona: {
+    rumours: [
+      { name: 'Nico Williams',     club: 'Athletic Bilbao', pos: 'LW',  likelihood: '55%', note: 'Long-term target — would reunite with Yamal' },
+      { name: 'Rodri',             club: 'Man City',        pos: 'DM',  likelihood: '20%', note: 'Dream signing but heavily contracted at City' },
+      { name: 'Dani Olmo (ext.)',  club: 'Contract talks',  pos: 'CAM', likelihood: '70%', note: 'Extension priority after registration saga' },
+    ],
+    inProcess: [
+      { name: 'Jonathan Tah',      club: 'B. Leverkusen',  pos: 'CB', status: 'Contract agreed', note: 'Free transfer, boosts defensive cover' },
+      { name: 'Joan García',       club: 'Espanyol',       pos: 'GK', status: 'Fee being agreed', note: 'Future backup/successor to Szczęsny' },
+    ],
+    doneDeal: [
+      { name: 'Dani Olmo',         club: 'RB Leipzig',       pos: 'CAM', status: 'Signed',   note: 'Club fought hard to register him legally' },
+      { name: 'Fermín López',      club: 'Academy',          pos: 'CM',  status: 'Promoted', note: 'Signed pro deal, permanent first-team player' },
+    ],
+  },
+  'real-madrid': {
+    rumours: [
+      { name: 'Trent Alexander-Arnold', club: 'Liverpool',    pos: 'RB',  likelihood: '60%', note: 'Contract expires — Florentino tracking closely' },
+      { name: 'Álvaro Morata',          club: 'AC Milan',     pos: 'ST',  likelihood: '30%', note: 'Backup striker option if Benzema-style depth needed' },
+      { name: 'Alphonso Davies',        club: 'Bayern Munich', pos: 'LB', likelihood: '45%', note: 'Out of contract, speed to complement Mendy' },
+    ],
+    inProcess: [
+      { name: 'Dean Huijsen',  club: 'Bournemouth',  pos: 'CB', status: 'Talks ongoing', note: 'Young Spanish CB earmarked for long-term future' },
+      { name: 'Endrick',       club: 'Palmeiras',    pos: 'ST', status: 'Deal done',     note: 'Already announced, joins summer 2024' },
+    ],
+    doneDeal: [
+      { name: 'Kylian Mbappé',  club: 'PSG',           pos: 'ST', status: 'Signed',  note: 'Free transfer, the biggest signing of the era' },
+      { name: 'Dani Carvajal',  club: 'Contract ext.', pos: 'RB', status: 'Extended', note: 'Renewed despite ACL injury, 1-year extension' },
+    ],
+  },
+  liverpool: {
+    rumours: [
+      { name: 'Xavi Simons',       club: 'RB Leipzig',    pos: 'CAM', likelihood: '45%', note: 'Slot wants a creative link between midfield and attack' },
+      { name: 'Florian Neuhaus',   club: 'B. Mönchengladbach', pos: 'CM', likelihood: '30%', note: 'Depth option in central midfield' },
+      { name: 'Omar Marmoush',     club: 'Eintracht Frankfurt', pos: 'ST', likelihood: '55%', note: 'Clinical striker who fits Slot\'s pressing system' },
+    ],
+    inProcess: [
+      { name: 'Federico Chiesa',  club: 'Juventus',   pos: 'RW', status: 'Medical done',  note: 'Adds pace and creativity to the right side' },
+      { name: 'Giorgi Mamardashvili', club: 'Valencia', pos: 'GK', status: 'Fee agreed',  note: 'Alisson succession plan begins' },
+    ],
+    doneDeal: [
+      { name: 'Arne Slot',         club: 'Feyenoord',      pos: 'Manager', status: 'Appointed', note: 'Replaced Klopp, won the league in first season' },
+      { name: 'Jarell Quansah',    club: 'Academy',        pos: 'CB',      status: 'Promoted',  note: 'Signed long-term deal, now regular first-teamer' },
+    ],
+  },
+  'man-city': {
+    rumours: [
+      { name: 'Rayan Cherki',      club: 'Olympique Lyon', pos: 'CAM', likelihood: '50%', note: 'Guardiola\'s next big creative signing project' },
+      { name: 'Marco Asensio',     club: 'PSG',            pos: 'RW',  likelihood: '25%', note: 'Versatile cover across front three' },
+      { name: 'Álex Grimaldo',     club: 'B. Leverkusen',  pos: 'LB',  likelihood: '40%', note: 'Attacking LB to replace Gvardiol if he moves' },
+    ],
+    inProcess: [
+      { name: 'Savio',             club: 'Troyes',          pos: 'RW', status: 'Deal agreed', note: 'City owned — now being integrated into first team' },
+      { name: 'Yan Couto',         club: 'Girona',          pos: 'RB', status: 'Recall planned', note: 'City owned — strong season in Spain' },
+    ],
+    doneDeal: [
+      { name: 'Rodri (ext.)',      club: 'Contract ext.',   pos: 'DM', status: 'Extended', note: 'New deal signed after Ballon d\'Or win' },
+      { name: 'Sergio Gómez',      club: 'Anderlecht',      pos: 'LB', status: 'Sold',     note: 'Moved on to create space and wages' },
+    ],
+  },
+};
+
+var TROPHY_MOCK = {
+  arsenal: [
+    { name: 'Premier League',         icon: '🏆', count: 13, note: 'Most recent: 2003/04 (Invincibles)' },
+    { name: 'FA Cup',                 icon: '🏆', count: 14, note: 'Record 14 wins — more than any club' },
+    { name: 'League Cup',             icon: '🏆', count: 2,  note: '1987, 1993' },
+    { name: 'FA Community Shield',    icon: '🛡️', count: 16, note: 'Most recent: 2023' },
+    { name: 'UEFA Cup Winners\' Cup', icon: '🏆', count: 1,  note: '1994 — beat Parma in Copenhagen' },
+    { name: 'Inter-Cities Fairs Cup', icon: '🏆', count: 1,  note: '1970' },
+    { name: 'UEFA Champions League',  icon: '🏆', count: 0,  note: 'Yet to be won' },
+  ],
+  barcelona: [
+    { name: 'La Liga',                icon: '🏆', count: 27, note: 'Most recent: 2022/23' },
+    { name: 'Copa del Rey',           icon: '🏆', count: 31, note: 'Record Copa del Rey winners' },
+    { name: 'UEFA Champions League',  icon: '🏆', count: 5,  note: '1992, 2006, 2009, 2011, 2015' },
+    { name: 'UEFA Cup Winners\' Cup', icon: '🏆', count: 4,  note: '1979, 1982, 1989, 1997' },
+    { name: 'FIFA Club World Cup',    icon: '🌍', count: 3,  note: '2009, 2011, 2015' },
+    { name: 'UEFA Super Cup',         icon: '🛡️', count: 5,  note: '1992, 1997, 2009, 2011, 2015' },
+    { name: 'Spanish Super Cup',      icon: '🛡️', count: 14, note: 'Most recent: 2023' },
+  ],
+  'real-madrid': [
+    { name: 'La Liga',                icon: '🏆', count: 35, note: 'More La Liga titles than any club' },
+    { name: 'UEFA Champions League',  icon: '🏆', count: 15, note: 'Most in the competition\'s history' },
+    { name: 'Copa del Rey',           icon: '🏆', count: 20, note: 'Most recent: 2023' },
+    { name: 'FIFA Club World Cup',    icon: '🌍', count: 8,  note: 'More than any other club' },
+    { name: 'UEFA Super Cup',         icon: '🛡️', count: 5,  note: 'Most recent: 2022' },
+    { name: 'Spanish Super Cup',      icon: '🛡️', count: 12, note: 'Most recent: 2024' },
+    { name: 'UEFA Cup Winners\' Cup', icon: '🏆', count: 0,  note: 'Never won' },
+  ],
+  liverpool: [
+    { name: 'Premier League / Div. 1', icon: '🏆', count: 19, note: 'Most recent: 2019/20' },
+    { name: 'FA Cup',                  icon: '🏆', count: 8,  note: 'Most recent: 2022' },
+    { name: 'League Cup',              icon: '🏆', count: 10, note: 'Record 10 wins — most of any club' },
+    { name: 'UEFA Champions League',   icon: '🏆', count: 6,  note: '1977, 1978, 1981, 1984, 2005, 2019' },
+    { name: 'UEFA Super Cup',          icon: '🛡️', count: 4,  note: 'Most recent: 2019' },
+    { name: 'FIFA Club World Cup',     icon: '🌍', count: 1,  note: '2019' },
+    { name: 'UEFA Cup',                icon: '🏆', count: 3,  note: '1973, 1976, 2001' },
+  ],
+  'man-city': [
+    { name: 'Premier League',         icon: '🏆', count: 10, note: 'Most recent: 2023/24 (4 in a row)' },
+    { name: 'FA Cup',                 icon: '🏆', count: 7,  note: 'Most recent: 2022/23 (part of treble)' },
+    { name: 'League Cup',             icon: '🏆', count: 8,  note: 'Most recent: 2023/24' },
+    { name: 'UEFA Champions League',  icon: '🏆', count: 1,  note: '2022/23 — Istanbul, beat Inter 1-0' },
+    { name: 'UEFA Super Cup',         icon: '🛡️', count: 0,  note: 'Yet to be won' },
+    { name: 'FIFA Club World Cup',    icon: '🌍', count: 1,  note: '2023' },
+    { name: 'FA Community Shield',    icon: '🛡️', count: 6,  note: 'Most recent: 2023' },
+  ],
+};
+
+var TACTICAL_MOCK = {
+  arsenal: {
+    formation: '4-3-3',
+    style: 'High-press · Possession-based · Half-space exploitation',
+    preview: [
+      { label: 'Pressing Trigger', value: 'GK receives ball' },
+      { label: 'Defensive Shape',  value: 'Mid-block 4-3-3' },
+      { label: 'Build-up Route',   value: 'Through RB + CM channel' },
+      { label: 'Width Source',     value: 'Inverted wide forwards' },
+    ],
+    teaser: "Arteta's press fires when the opponent goalkeeper receives. Saka and Martinelli spring from wide positions simultaneously, while Rice drops to screen the centre. The shape flips from 4-3-3 to a 4-2-4 off-ball, compressing the opponent into wide areas. The key trigger is Ødegaard's press signal — a shoulder drop followed by a sprint...",
+    locked: [
+      'Full pressing trigger map — 8 scenarios with opponent reactions',
+      'Set-piece routines — corners, free kicks, and throw-in patterns',
+      'Defensive shape transitions when facing 3-at-the-back',
+      'Build-up sequences from GK through to final-third entry',
+      'Half-space exploitation — Ødegaard\'s deep run combinations',
+      'Defensive line triggers and offside trap timing',
+    ],
+  },
+  barcelona: {
+    formation: '4-2-3-1',
+    style: 'Positional play · Vertical pressing · La Masia DNA',
+    preview: [
+      { label: 'Pressing Trigger', value: 'Opponent's 2nd touch' },
+      { label: 'Defensive Shape',  value: 'High press 4-2-3-1' },
+      { label: 'Build-up Route',   value: 'Through centre via Pedri' },
+      { label: 'Width Source',     value: 'Full-backs + Yamal/Raphinha' },
+    ],
+    teaser: "Flick's Barcelona press from the front — Lewandowski pins the first CB while Olmo shadows the pivot. The double pivot of Casado and Pedri creates a high-density midfield zone. When Yamal drifts inside, Koundé overlaps the right channel creating a 2v1 against the opposition LB — the most dangerous recurring pattern...",
+    locked: [
+      'Full positional play trigger sequences and spacing rules',
+      'Flick\'s 4-2-3-1 vs. 4-3-3 — when does the shape shift?',
+      'Yamal\'s half-space movements mapped against 5 defensive systems',
+      'Set-piece patterns — Koundé\'s role in corner routines',
+      'How Pedri bypasses pressing traps — 6 recurring passing sequences',
+      'Counter-press triggers and reset positioning',
+    ],
+  },
+  'real-madrid': {
+    formation: '4-3-3',
+    style: 'Controlled possession · UCL mentality · Individual brilliance',
+    preview: [
+      { label: 'Pressing Trigger', value: 'Opponent\'s slow build-up' },
+      { label: 'Defensive Shape',  value: 'Mid-block 4-5-1' },
+      { label: 'Build-up Route',   value: 'Wide to central switch via Valverde' },
+      { label: 'Width Source',     value: 'Vinícius isolation + Mbappé runs' },
+    ],
+    teaser: "Ancelotti's Madrid set up in a compact 4-5-1 without the ball, inviting opponents to commit forward before releasing Vinícius or Mbappé on the counter. The key transition moment is Bellingham's turn in the pocket — when he faces up, Vinícius makes his diagonal run and Mbappé pins the backline...",
+    locked: [
+      'Transition patterns — how Madrid counter in 3–5 seconds',
+      'Vinícius isolation play — 7 recurring right-to-left switch sequences',
+      'Mbappé\'s pin runs and how they create channels for Rodrygo',
+      'Ancelotti\'s 4-5-1 defensive organisation — zone-by-zone breakdown',
+      'Set-piece delivery patterns and box positioning',
+      'How Madrid defend their lead in the final 15 minutes (UCL blueprint)',
+    ],
+  },
+  liverpool: {
+    formation: '4-3-3',
+    style: 'Gegenpressing · High line · Transition speed',
+    preview: [
+      { label: 'Pressing Trigger', value: 'Opponent\'s backwards pass' },
+      { label: 'Defensive Shape',  value: 'High press 4-3-3' },
+      { label: 'Build-up Route',   value: 'From Alisson — direct to wide' },
+      { label: 'Width Source',     value: 'Robertson + TAA inverted' },
+    ],
+    teaser: "Slot's Liverpool press on backwards passes — the signal for Salah to sprint at the LB while Núñez pins both CBs. Gravenberch covers the pivot role, screening the back four in their absence. Alexander-Arnold's inside positioning creates a midfield 4 in possession, giving Liverpool an overload through the centre...",
+    locked: [
+      'Gegenpressing trigger zones — 5 high-value areas mapped',
+      'Salah\'s off-ball movement patterns and how space is created',
+      'TAA\'s hybrid role — fullback to CM transition breakdown',
+      'How Liverpool exploit the space behind the press when it\'s beat',
+      'Defensive line management — high line triggers and drop thresholds',
+      'Set-piece analysis — 14-goal corner routine breakdown',
+    ],
+  },
+  'man-city': {
+    formation: '4-3-3',
+    style: 'Positional superiority · Inverted fullbacks · Systematic dominance',
+    preview: [
+      { label: 'Pressing Trigger', value: 'Opponent GK long ball' },
+      { label: 'Defensive Shape',  value: '4-2-4 off the ball' },
+      { label: 'Build-up Route',   value: 'Inverted fullbacks into half-spaces' },
+      { label: 'Width Source',     value: 'Striker width + Doku dribbles' },
+    ],
+    teaser: "Guardiola's City create a 3-2 structure in build-up: Rodri drops alongside the two CBs while Walker and Gvardiol invert into midfield zones. This creates a 5v3 advantage at the back, forcing opponents to commit centrally — exactly when De Bruyne switches the play to Doku in wide space...",
+    locked: [
+      'Full inverted fullback positional rules — 12 recurring sequences',
+      'How City create 3-2 build-up structures against 4-4-2 vs 4-3-3',
+      'De Bruyne\'s switch pass — when, why, and where it goes',
+      'Haaland off-ball movement and the 3 key zones he exploits',
+      'City\'s press resistance system — 8 passing patterns under pressure',
+      'How Guardiola adjusts in-game: 3 documented mid-match tactical shifts',
+    ],
+  },
+};
+
+// ── Simple array shuffle (used for quiz question order) ──────
+function shuffleArr(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
 // Bottom nav tab definitions — these are app-level, not team-specific
 const NAV = [
   { id: 'home',  icon: '⌂',  lbl: 'Home'     },
@@ -288,6 +523,498 @@ function QuizModal({ onClose, data }) {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+
+// ── Quiz Launcher Modal ───────────────────────────────────────
+// Lets user pick quiz length (3 / 5 / 10 / 15), then plays that quiz
+function QuizLauncherModal({ teamSlug, onClose }) {
+  const allQuestions = ((typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug] && TEAMS_DATA[teamSlug].quiz) || []);
+  const [step,    setStep]    = useState('pick');   // 'pick' | 'play' | 'results'
+  const [length,  setLength]  = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [qIndex,  setQIndex]  = useState(0);
+  const [chosen,  setChosen]  = useState(null);
+  const [score,   setScore]   = useState(0);
+
+  function startQuiz(len) {
+    const shuffled = shuffleArr(allQuestions).slice(0, len);
+    setLength(len);
+    setQuestions(shuffled);
+    setQIndex(0);
+    setChosen(null);
+    setScore(0);
+    setStep('play');
+  }
+
+  function pick(i) {
+    if (chosen !== null) return;
+    setChosen(i);
+    if (i === questions[qIndex].answer) setScore(s => s + 1);
+    setTimeout(() => {
+      setChosen(null);
+      if (qIndex < questions.length - 1) {
+        setQIndex(idx => idx + 1);
+      } else {
+        PollService.updateStreak();
+        setStep('results');
+      }
+    }, 1000);
+  }
+
+  const teamData = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
+  const teamShort = teamData.shortName || teamSlug;
+
+  if (step === 'pick') {
+    const maxLen = allQuestions.length;
+    const lengths = [3, 5, 10, 15].filter(l => l <= maxLen || l === 3);
+    return (
+      <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="modal-sheet">
+          <div className="modal-handle" />
+          <div className="modal-title">Quizzes</div>
+          <div className="modal-sub">Pick your quiz length — test your {teamShort} knowledge</div>
+          <div style={{ padding: '0 16px 28px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[3, 5, 10, 15].map(len => {
+              const available = len <= maxLen;
+              return (
+                <button
+                  key={len}
+                  className={`btn ${available ? 'btn-ghost' : 'btn-ghost'}`}
+                  style={{ opacity: available ? 1 : 0.4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px' }}
+                  onClick={() => available && startQuiz(len)}
+                  disabled={!available}
+                >
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>{len} Questions</span>
+                  <span style={{ fontSize: 13, color: 'var(--t3)' }}>
+                    {len === 3 ? 'Quick' : len === 5 ? 'Standard' : len === 10 ? 'Deep dive' : 'Full challenge'}
+                    {!available ? ' — coming soon' : ' →'}
+                  </span>
+                </button>
+              );
+            })}
+            <button className="btn btn-ghost" style={{ marginTop: 4, color: 'var(--t3)', fontSize: 14 }} onClick={onClose}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'results') {
+    const pct = length > 0 ? score / length : 0;
+    const msg = pct === 1 ? 'Full marks! 🏆' : pct >= 0.8 ? 'Almost perfect!' : pct >= 0.5 ? 'Good effort!' : 'Keep practicing!';
+    const scoreColor = pct === 1 ? 'var(--win)' : pct === 0 ? 'var(--loss)' : 'var(--t1)';
+    return (
+      <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="modal-sheet">
+          <div className="modal-handle" />
+          <div className="modal-title">Quiz Complete</div>
+          <div className="quiz-score">
+            <div className="quiz-score-num" style={{ color: scoreColor }}>{score}/{length}</div>
+            <div className="quiz-score-label">Questions correct</div>
+            <div className="quiz-score-msg">{msg}</div>
+          </div>
+          <div style={{ padding: '0 16px 8px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button className="btn btn-red" onClick={() => startQuiz(length)}>Play Again</button>
+            <button className="btn btn-ghost" style={{ fontSize: 14 }} onClick={() => setStep('pick')}>Try Different Length</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Play step
+  const q = questions[qIndex];
+  return (
+    <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div className="modal-title">{teamShort} Quiz — {length}Q</div>
+        <div className="quiz-progress">
+          {questions.map((_, i) => (
+            <div key={i} className={`quiz-dot${i < qIndex ? ' done' : i === qIndex ? ' current' : ''}`} />
+          ))}
+        </div>
+        <div className="quiz-q">{q.q}</div>
+        {q.options.map((opt, i) => {
+          let cls = '';
+          if (chosen !== null) {
+            if (i === q.answer) cls = ' correct';
+            else if (i === chosen) cls = ' wrong';
+            else cls = ' dimmed';
+          }
+          return (
+            <div key={i} className={`quiz-opt${cls}`} onClick={() => pick(i)}>
+              <div className="quiz-letter">{String.fromCharCode(65 + i)}</div>
+              {opt}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+// ── Player Compare Modal ──────────────────────────────────────
+function PlayerCompareModal({ teamSlug, onClose }) {
+  const squad    = (PlayerService.getSquad(teamSlug) || []).filter(p => p.position !== 'GK' && p.injuryStatus !== 'out');
+  const [p1Id, setP1Id] = useState(null);
+  const [p2Id, setP2Id] = useState(null);
+  const step = p1Id === null ? 'pick1' : p2Id === null ? 'pick2' : 'compare';
+
+  const teamData  = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
+  const teamShort = teamData.shortName || teamSlug;
+
+  const COMPARE_STATS = [
+    { key: 'goals',         label: 'Goals',            higherBetter: true },
+    { key: 'assists',       label: 'Assists',          higherBetter: true },
+    { key: 'appearances',   label: 'Appearances',      higherBetter: true },
+    { key: 'minutes',       label: 'Minutes',          higherBetter: true },
+    { key: 'shots',         label: 'Shots',            higherBetter: true },
+    { key: 'shotsOnTarget', label: 'Shots on Target',  higherBetter: true },
+    { key: 'passAccuracy',  label: 'Pass Accuracy',    higherBetter: true, suffix: '%' },
+    { key: 'chancesCreated',label: 'Chances Created',  higherBetter: true },
+  ];
+
+  function PlayerPickList({ excludeId, onSelect }) {
+    return (
+      <div className="card" style={{ margin: '0 16px 24px', overflow: 'hidden' }}>
+        {squad.filter(p => p.id !== excludeId).map(p => (
+          <div
+            key={p.id}
+            style={{ display: 'flex', alignItems: 'center', padding: '13px 18px', borderBottom: '1px solid var(--b1)', cursor: 'pointer' }}
+            onClick={() => onSelect(p.id)}
+          >
+            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.5px', width: 32 }}>{p.position}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--t1)', flex: 1 }}>{p.name}</div>
+            <div style={{ fontSize: 13, color: 'var(--t3)' }}>#{p.number}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (step === 'pick1') {
+    return (
+      <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="modal-sheet">
+          <div className="modal-handle" />
+          <div className="modal-title">Player Compare</div>
+          <div className="modal-sub">Select first player</div>
+          <PlayerPickList excludeId={null} onSelect={setP1Id} />
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'pick2') {
+    const p1 = squad.find(p => p.id === p1Id);
+    return (
+      <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="modal-sheet">
+          <div className="modal-handle" />
+          <div className="modal-title">Player Compare</div>
+          <div className="modal-sub">Now pick a second player to compare with {p1 ? p1.shortName : ''}</div>
+          <PlayerPickList excludeId={p1Id} onSelect={setP2Id} />
+        </div>
+      </div>
+    );
+  }
+
+  // Compare view
+  const p1 = squad.find(p => p.id === p1Id);
+  const p2 = squad.find(p => p.id === p2Id);
+  if (!p1 || !p2) return null;
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        {/* Header row */}
+        <div style={{ display: 'flex', padding: '0 16px 16px', gap: 8 }}>
+          <div style={{ flex: 1, background: 'var(--s2)', borderRadius: 14, padding: '14px 12px', textAlign: 'center', border: '1px solid var(--b2)' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{p1.position}</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--t1)', marginTop: 4, lineHeight: 1.25 }}>{p1.shortName}</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>#{p1.number}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', color: 'var(--t3)', fontWeight: 800, fontSize: 12 }}>VS</div>
+          <div style={{ flex: 1, background: 'var(--s2)', borderRadius: 14, padding: '14px 12px', textAlign: 'center', border: '1px solid var(--b2)' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{p2.position}</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--t1)', marginTop: 4, lineHeight: 1.25 }}>{p2.shortName}</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>#{p2.number}</div>
+          </div>
+        </div>
+        {/* Stats comparison */}
+        <div className="card" style={{ margin: '0 16px 16px', overflow: 'hidden' }}>
+          {COMPARE_STATS.map(({ key, label, higherBetter, suffix = '' }) => {
+            const v1 = p1.stats[key] || 0;
+            const v2 = p2.stats[key] || 0;
+            const p1Better = higherBetter ? v1 > v2 : v1 < v2;
+            const p2Better = higherBetter ? v2 > v1 : v2 < v1;
+            return (
+              <div key={key} style={{ display: 'flex', alignItems: 'center', padding: '11px 16px', borderBottom: '1px solid var(--b1)' }}>
+                <div style={{ flex: 1, textAlign: 'right', fontSize: 16, fontWeight: 800, color: p1Better ? 'var(--win)' : 'var(--t1)' }}>
+                  {v1}{suffix}
+                </div>
+                <div style={{ width: 110, textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.4px', padding: '0 6px' }}>
+                  {label}
+                </div>
+                <div style={{ flex: 1, textAlign: 'left', fontSize: 16, fontWeight: 800, color: p2Better ? 'var(--win)' : 'var(--t1)' }}>
+                  {v2}{suffix}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ padding: '0 16px 8px', display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => { setP1Id(null); setP2Id(null); }}>New Compare</button>
+          <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={onClose}>Done</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ── Transfer Tracker Modal ────────────────────────────────────
+function TransferTrackerModal({ teamSlug, onClose }) {
+  const [tab, setTab] = useState('rumours');
+  const data = TRANSFER_MOCK[teamSlug] || TRANSFER_MOCK['arsenal'];
+  const teamData = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
+  const teamShort = teamData.shortName || teamSlug;
+
+  const sections = {
+    rumours:   { label: 'Rumours',    items: data.rumours   || [] },
+    inProcess: { label: 'In Process', items: data.inProcess || [] },
+    doneDeal:  { label: 'Done Deal',  items: data.doneDeal  || [] },
+  };
+
+  const SECTION_COLORS = {
+    rumours:   { bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.25)', text: 'var(--draw)' },
+    inProcess: { bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.28)', text: '#818CF8' },
+    doneDeal:  { bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.28)',  text: 'var(--win)' },
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div className="modal-title">Transfer Tracker</div>
+        <div className="modal-sub">{teamShort} — summer window activity</div>
+        {/* Tab strip */}
+        <div style={{ display: 'flex', gap: 6, padding: '0 16px 16px' }}>
+          {Object.entries(sections).map(([key, { label }]) => {
+            const col = SECTION_COLORS[key];
+            const active = tab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                style={{
+                  flex: 1, border: `1px solid ${active ? col.border : 'var(--b1)'}`,
+                  background: active ? col.bg : 'var(--s2)',
+                  borderRadius: 10, padding: '8px 4px',
+                  fontSize: 11, fontWeight: 700,
+                  color: active ? col.text : 'var(--t3)',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+        {/* Player cards */}
+        <div className="card" style={{ margin: '0 16px 24px', overflow: 'hidden' }}>
+          {sections[tab].items.map((item, i) => {
+            const col = SECTION_COLORS[tab];
+            return (
+              <div key={i} style={{ padding: '14px 18px', borderBottom: i < sections[tab].items.length - 1 ? '1px solid var(--b1)' : 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--t1)' }}>{item.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 2 }}>{item.club}</div>
+                  </div>
+                  <div style={{ background: 'var(--s2)', border: '1px solid var(--b1)', borderRadius: 8, padding: '3px 8px', fontSize: 11, fontWeight: 700, color: 'var(--t3)', flexShrink: 0 }}>{item.pos}</div>
+                  {tab === 'rumours' && item.likelihood && (
+                    <div style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 8, padding: '3px 8px', fontSize: 11, fontWeight: 800, color: col.text, flexShrink: 0 }}>{item.likelihood}</div>
+                  )}
+                  {(tab === 'inProcess' || tab === 'doneDeal') && item.status && (
+                    <div style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 8, padding: '3px 8px', fontSize: 11, fontWeight: 800, color: col.text, flexShrink: 0, maxWidth: 90, textAlign: 'center', lineHeight: 1.3 }}>{item.status}</div>
+                  )}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--t3)', lineHeight: 1.55 }}>{item.note}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ── Season Stats Modal ────────────────────────────────────────
+function SeasonStatsModal({ teamSlug, onClose, onOpenModal }) {
+  const dashData   = (typeof DASHBOARD_DATA !== 'undefined' && DASHBOARD_DATA[teamSlug]) || {};
+  const stats      = dashData.seasonStats || {};
+  const teamData   = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
+  const teamShort  = teamData.shortName || teamSlug;
+  const competition = (dashData.standings && dashData.standings.competition) || 'League';
+
+  const STAT_ROWS = [
+    { key: 'played',        label: 'Games Played',   icon: '📅', fmt: v => v },
+    { key: 'goalsScored',   label: 'Goals Scored',   icon: '⚽', fmt: v => v },
+    { key: 'goalsConceded', label: 'Goals Conceded',  icon: '🥅', fmt: v => v },
+    { key: 'assists',       label: 'Assists',         icon: '🎯', fmt: v => v },
+    { key: 'cleanSheets',   label: 'Clean Sheets',    icon: '🧤', fmt: v => v },
+    { key: 'possession',    label: 'Avg Possession',  icon: '🔄', fmt: v => v },
+    { key: 'shotsPerGame',  label: 'Shots / Game',    icon: '💨', fmt: v => v },
+    { key: 'xGFor',         label: 'xG For',          icon: '📈', fmt: v => v },
+    { key: 'xGAgainst',     label: 'xG Against',      icon: '📉', fmt: v => v },
+  ];
+
+  const hasData = Object.keys(stats).length > 0;
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div className="modal-title">Season Stats</div>
+        <div className="modal-sub">{teamShort} · {competition} · 2024/25</div>
+        {hasData ? (
+          <div className="card" style={{ margin: '0 16px 16px', overflow: 'hidden' }}>
+            {STAT_ROWS.map(({ key, label, icon, fmt }, i) => {
+              const val = stats[key];
+              if (val === undefined || val === null) return null;
+              return (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', padding: '13px 18px', borderBottom: i < STAT_ROWS.length - 1 ? '1px solid var(--b1)' : 'none' }}>
+                  <div style={{ fontSize: 16, marginRight: 12, width: 24, textAlign: 'center', flexShrink: 0 }}>{icon}</div>
+                  <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'var(--t2)' }}>{label}</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--t1)', letterSpacing: '-0.3px' }}>{fmt(val)}</div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--t3)', fontSize: 14 }}>
+            Season stats not yet available for this team.
+          </div>
+        )}
+        {/* Locked Match Edge card */}
+        <div style={{ margin: '0 16px 24px', background: 'linear-gradient(135deg,rgba(239,1,7,0.08) 0%,rgba(239,1,7,0.04) 100%)', border: '1px solid var(--red-b)', borderRadius: 16, padding: '16px' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>🔒 Match Edge — Pro</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--t1)', marginBottom: 4 }}>Advanced Performance Metrics</div>
+          <div style={{ fontSize: 13, color: 'var(--t3)', lineHeight: 1.55, marginBottom: 14 }}>
+            xG per shot, PPDA, OBVA, progressive carries, press intensity and 20+ advanced metrics unlocked with Pro.
+          </div>
+          <button className="btn btn-red" style={{ fontSize: 14, padding: '12px' }} onClick={() => { onClose(); onOpenModal('waitlist'); }}>
+            Unlock with Pro →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ── Trophy Room Modal ─────────────────────────────────────────
+function TrophyRoomModal({ teamSlug, onClose }) {
+  const trophies = TROPHY_MOCK[teamSlug] || TROPHY_MOCK['arsenal'];
+  const teamData  = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
+  const teamShort = teamData.shortName || teamSlug;
+  const total     = trophies.reduce((sum, t) => sum + t.count, 0);
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div className="modal-title">Trophy Room</div>
+        <div className="modal-sub">{teamShort} — {total} major trophies</div>
+        <div className="card" style={{ margin: '0 16px 24px', overflow: 'hidden' }}>
+          {trophies.map((t, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderBottom: i < trophies.length - 1 ? '1px solid var(--b1)' : 'none' }}>
+              <div style={{ fontSize: 20, width: 28, textAlign: 'center', flexShrink: 0, opacity: t.count > 0 ? 1 : 0.25 }}>{t.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: t.count > 0 ? 'var(--t1)' : 'var(--t3)' }}>{t.name}</div>
+                <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2, lineHeight: 1.4 }}>{t.note}</div>
+              </div>
+              <div style={{
+                minWidth: 36, height: 36, borderRadius: 10,
+                background: t.count > 0 ? 'var(--red-a)' : 'var(--s2)',
+                border: `1px solid ${t.count > 0 ? 'var(--red-b)' : 'var(--b1)'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: t.count > 9 ? 13 : 16, fontWeight: 800,
+                color: t.count > 0 ? 'var(--red)' : 'var(--t3)',
+                flexShrink: 0,
+              }}>
+                {t.count}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ── Tactical Breakdown Modal ──────────────────────────────────
+function TacticalBreakdownModal({ teamSlug, onClose, onOpenModal }) {
+  const td      = TACTICAL_MOCK[teamSlug] || TACTICAL_MOCK['arsenal'];
+  const teamData = (typeof TEAMS_DATA !== 'undefined' && TEAMS_DATA[teamSlug]) || {};
+  const manager  = teamData.manager   || 'The manager';
+  const teamShort = teamData.shortName || teamSlug;
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div className="modal-title">Tactical Breakdown</div>
+        <div className="modal-sub">{teamShort} · {td.formation} · {td.style}</div>
+
+        {/* Quick stat grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '0 16px 16px' }}>
+          {td.preview.map((item, i) => (
+            <div key={i} style={{ background: 'var(--s2)', border: '1px solid var(--b1)', borderRadius: 12, padding: '12px 14px' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 5 }}>{item.label}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--t1)', lineHeight: 1.35 }}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Teaser analysis */}
+        <div style={{ margin: '0 16px 16px', background: 'var(--s2)', border: '1px solid var(--b2)', borderRadius: 14, padding: '16px' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>Analysis Preview</div>
+          <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.65 }}>
+            {td.teaser}
+          </div>
+          <div style={{ marginTop: 12, fontSize: 12, color: 'var(--t3)', fontStyle: 'italic' }}>— Analysis continues with Pro access</div>
+        </div>
+
+        {/* Locked full analysis */}
+        <div style={{ margin: '0 16px 8px', background: 'linear-gradient(135deg,rgba(239,1,7,0.08) 0%,rgba(239,1,7,0.04) 100%)', border: '1px solid var(--red-b)', borderRadius: 16, padding: '16px' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>🔒 Full Analysis — Pro</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {td.locked.map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.6 }}>
+                <div style={{ width: 16, height: 16, borderRadius: 4, background: 'var(--s2)', border: '1px solid var(--b2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, flexShrink: 0 }}>🔒</div>
+                <div style={{ fontSize: 12, color: 'var(--t2)', lineHeight: 1.4 }}>{item}</div>
+              </div>
+            ))}
+          </div>
+          <button className="btn btn-red" style={{ fontSize: 14, padding: '12px' }} onClick={() => { onClose(); onOpenModal('waitlist'); }}>
+            Unlock Full Analysis →
+          </button>
+        </div>
+
+        <div style={{ padding: '12px 16px 8px' }}>
+          <button className="btn btn-ghost" style={{ fontSize: 14 }} onClick={onClose}>Back</button>
+        </div>
       </div>
     </div>
   );
@@ -570,9 +1297,15 @@ function PlayerModal({ player, onClose }) {
 // ── Modal dispatcher ──────────────────────────────────────────
 function Modal({ modal, teamSlug, onClose, onOpenModal, onProActivated }) {
   const { type, data } = modal;
-  if (type === 'player')  return <PlayerModal player={data.player} onClose={onClose} />;
-  if (type === 'vote')    return <VoteModal teamSlug={teamSlug} onClose={onClose} />;
-  if (type === 'quiz')    return <QuizModal onClose={onClose} data={data} />;
+  if (type === 'player')             return <PlayerModal player={data.player} onClose={onClose} />;
+  if (type === 'vote')               return <VoteModal teamSlug={teamSlug} onClose={onClose} />;
+  if (type === 'quiz')               return <QuizModal onClose={onClose} data={data} />;
+  if (type === 'quiz-launcher')      return <QuizLauncherModal teamSlug={teamSlug} onClose={onClose} />;
+  if (type === 'player-compare')     return <PlayerCompareModal teamSlug={teamSlug} onClose={onClose} />;
+  if (type === 'transfer-tracker')   return <TransferTrackerModal teamSlug={teamSlug} onClose={onClose} />;
+  if (type === 'season-stats')       return <SeasonStatsModal teamSlug={teamSlug} onClose={onClose} onOpenModal={onOpenModal} />;
+  if (type === 'trophy-room')        return <TrophyRoomModal teamSlug={teamSlug} onClose={onClose} />;
+  if (type === 'tactical-breakdown') return <TacticalBreakdownModal teamSlug={teamSlug} onClose={onClose} onOpenModal={onOpenModal} />;
   if (type === 'paywall')  return <PaywallModal teamSlug={teamSlug} onClose={onClose} onSuccess={onProActivated} />;
   if (type === 'waitlist') return <WaitlistModal onClose={onClose} />;
   if (type === 'locked')  return (
@@ -1974,18 +2707,17 @@ function FanScreen({ teamSlug, onOpenModal }) {
       <div className="sec">
         <div className="sec-hd">
           <span className="lbl">Tools & Content</span>
-          <span className="sec-more">See all →</span>
         </div>
         <div className="fgrid">
           {[
-            { icon: '📐', lbl: 'Tactical Board',   sub: 'How ' + fanShortName + ' play' },
-            { icon: '⇄',  lbl: 'Player Compare',   sub: 'Head-to-head stats'   },
-            { icon: '🔄', lbl: 'Transfer Tracker',  sub: 'Ins, outs & rumours'  },
-            { icon: '🖼', lbl: 'Wallpapers',        sub: 'Free downloads'       },
-            { icon: '📅', lbl: 'Season Stats',      sub: 'All competitions'     },
-            { icon: '🏆', lbl: 'Trophy Room',       sub: 'Club history'         },
-          ].map(({ icon, lbl, sub }) => (
-            <div key={lbl} className="fcrd">
+            { icon: '🧠', lbl: 'Quizzes',          sub: '3–15 question modes',       modal: 'quiz-launcher'      },
+            { icon: '⇄',  lbl: 'Player Compare',   sub: 'Head-to-head stats',        modal: 'player-compare'     },
+            { icon: '🔄', lbl: 'Transfer Tracker',  sub: 'Ins, outs & rumours',       modal: 'transfer-tracker'   },
+            { icon: '🏆', lbl: 'Trophy Room',       sub: 'Club history',              modal: 'trophy-room'        },
+            { icon: '📅', lbl: 'Season Stats',      sub: 'All competitions',          modal: 'season-stats'       },
+            { icon: '📐', lbl: 'Tactical Board',    sub: 'How ' + fanShortName + ' play', modal: 'tactical-breakdown' },
+          ].map(({ icon, lbl, sub, modal }) => (
+            <div key={lbl} className="fcrd" onClick={() => onOpenModal(modal)}>
               <div className="ficn">{icon}</div>
               <div className="flbl">{lbl}</div>
               <div className="fsub">{sub}</div>
@@ -2021,13 +2753,35 @@ function FanScreen({ teamSlug, onOpenModal }) {
       <div className="sec">
         <div className="lbl" style={{ marginBottom: 12 }}>Tactical Breakdown</div>
         <div className="card" style={{ padding: 18 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--t1)', marginBottom: 8, lineHeight: 1.4 }}>
-            How {fanManager} builds {fanShortName}'s pressing system
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--t3)', lineHeight: 1.6 }}>
-            Trigger points, defensive shape and set-piece structure — explained visually.
-          </div>
-          <button className="btn btn-ghost" style={{ marginTop: 14, fontSize: 14 }}>Read Analysis →</button>
+          {(() => {
+            const td = TACTICAL_MOCK[teamSlug] || TACTICAL_MOCK['arsenal'];
+            return (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--t1)', flex: 1 }}>
+                    {fanManager} · {td.formation}
+                  </div>
+                  <div style={{ background: 'var(--red-a)', border: '1px solid var(--red-b)', borderRadius: 8, padding: '3px 8px', fontSize: 11, fontWeight: 700, color: 'var(--red)' }}>
+                    Preview
+                  </div>
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--t3)', lineHeight: 1.6, marginBottom: 14 }}>
+                  {td.style}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14 }}>
+                  {td.preview.slice(0, 2).map((item, i) => (
+                    <div key={i} style={{ background: 'var(--s2)', borderRadius: 10, padding: '10px 12px' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>{item.label}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--t1)' }}>{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+                <button className="btn btn-ghost" style={{ fontSize: 14 }} onClick={() => onOpenModal('tactical-breakdown')}>
+                  Read Full Analysis →
+                </button>
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>
